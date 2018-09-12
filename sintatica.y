@@ -7,7 +7,6 @@
 
 using namespace std;
 
-string tabela_simbolos [10][3];
 
 struct atributos
 {
@@ -30,7 +29,6 @@ string genTemp();
 
 %left '+' '-'
 %left '*' '/'
-
 
 %%
 
@@ -61,10 +59,20 @@ COMANDO 	: E ';'
 			}
 			;
 
-E 			: E '+' E
+E 			: E '/' E
 			{
 				$$.label = genTemp();
-				$$.traducao = $1.traducao + $3.traducao ; + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
+			}
+			|E '*' E
+			{
+				$$.label = genTemp();
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
+			}
+			| E '+' E
+			{
+				$$.label = genTemp();
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
 			}
 			| E '-' E
 			{
