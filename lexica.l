@@ -7,6 +7,7 @@ ESPACO [ \t]
 DIGITO [0-9]
 LETRA [A-Za-z_]
 
+ATRIB {=}
 DELIM {ESPACO}+
 NUM {DIGITO}+
 REAL {NUM}+("."{NUM}+)?
@@ -23,7 +24,7 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "int"		{return TK_TIPO_INT;}
 
-[(){}[\];,]	{ return *yytext; }
+[(){}[\];,=]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
