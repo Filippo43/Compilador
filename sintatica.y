@@ -143,7 +143,7 @@ COMANDO 	: ID '=' E ';'
 				//$1.tipo = simb.tipo;
 				//$1.traducao = simb.temp;
 
-				$$.traducao =  $3.traducao + "\t" + simb.temp + " = " + $3.label;
+				$$.traducao =  $3.traducao + "\t" + simb.temp + " = " + $3.label + ";\n";
 			}
 			| TIPO ID ';'
 			{
@@ -180,21 +180,34 @@ E 			: E '/' E
 				$$.label = genTemp();
 				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
 			}
-			|E '*' E
+			| E '*' E
 			{
 				$$.label = genTemp();
 				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
 			}
 			| E '+' E
 			{
+				string temp = genTemp();
+
+				insereSimbolo(genNumId(), "int", temp);
+
 				//$$.label = genTemp();
-				$$.traducao = $1.traducao + $3.traducao;
-				$$.label = $1.label + " + " + $3.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao + 
+				"\t" + "int " + temp + " = " + $1.label + " + " + $3.label + ";\n";
+
+				$$.label = temp;
 			}
 			| E '-' E
 			{
-				$$.label = genTemp();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
+				string temp = genTemp();
+
+				insereSimbolo(genNumId(), "int", temp);
+
+				//$$.label = genTemp();
+				$$.traducao = $1.traducao + $3.traducao + 
+				"\t" + "int " + temp + " = " + $1.label + " - " + $3.label + ";\n";
+
+				$$.label = temp;
 			}
 			| TK_NUM
 			{

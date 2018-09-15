@@ -521,7 +521,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,   106,   106,   115,   123,   129,   134,   148,   172,   178,
-     183,   188,   194,   199,   209,   216
+     183,   188,   200,   212,   222,   229
 };
 #endif
 
@@ -1355,7 +1355,7 @@ yyreduce:
 				//$1.tipo = simb.tipo;
 				//$1.traducao = simb.temp;
 
-				(yyval).traducao =  (yyvsp[-1]).traducao + "\t" + simb.temp + " = " + (yyvsp[-1]).label;
+				(yyval).traducao =  (yyvsp[-1]).traducao + "\t" + simb.temp + " = " + (yyvsp[-1]).label + ";\n";
 			}
 #line 1361 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1416,24 +1416,37 @@ yyreduce:
   case 11:
 #line 189 "sintatica.y" /* yacc.c:1646  */
     {
+				string temp = genTemp();
+
+				insereSimbolo(genNumId(), "int", temp);
+
 				//$$.label = genTemp();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao;
-				(yyval).label = (yyvsp[-2]).label + " + " + (yyvsp[0]).label + ";\n";
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + 
+				"\t" + "int " + temp + " = " + (yyvsp[-2]).label + " + " + (yyvsp[0]).label + ";\n";
+
+				(yyval).label = temp;
 			}
-#line 1424 "y.tab.c" /* yacc.c:1646  */
+#line 1430 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 195 "sintatica.y" /* yacc.c:1646  */
+#line 201 "sintatica.y" /* yacc.c:1646  */
     {
-				(yyval).label = genTemp();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " - " + (yyvsp[0]).label + ";\n";
+				string temp = genTemp();
+
+				insereSimbolo(genNumId(), "int", temp);
+
+				//$$.label = genTemp();
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + 
+				"\t" + "int " + temp + " = " + (yyvsp[-2]).label + " - " + (yyvsp[0]).label + ";\n";
+
+				(yyval).label = temp;
 			}
-#line 1433 "y.tab.c" /* yacc.c:1646  */
+#line 1446 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 200 "sintatica.y" /* yacc.c:1646  */
+#line 213 "sintatica.y" /* yacc.c:1646  */
     {
 				string id = genNumId();
 				string temp = genTemp();
@@ -1443,31 +1456,31 @@ yyreduce:
 				(yyval).traducao = "\tint " + temp + " = " + (yyvsp[0]).label + ";\n";
 				(yyval).label = temp;
 			}
-#line 1447 "y.tab.c" /* yacc.c:1646  */
+#line 1460 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 210 "sintatica.y" /* yacc.c:1646  */
+#line 223 "sintatica.y" /* yacc.c:1646  */
     {
 				//Busca no mapa
 				(yyval).label = genTemp(); //Atribuir se a temporária existe
 				(yyval).traducao = "\t" + (yyval).tipo + "" + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
-#line 1457 "y.tab.c" /* yacc.c:1646  */
+#line 1470 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 217 "sintatica.y" /* yacc.c:1646  */
+#line 230 "sintatica.y" /* yacc.c:1646  */
     {
 				//$$.label = genTemp(); 
 				//Atribuir se a temporária existe
 				(yyval).label = (yyvsp[0]).label;
 			}
-#line 1467 "y.tab.c" /* yacc.c:1646  */
+#line 1480 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1471 "y.tab.c" /* yacc.c:1646  */
+#line 1484 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1695,7 +1708,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 224 "sintatica.y" /* yacc.c:1906  */
+#line 237 "sintatica.y" /* yacc.c:1906  */
 
 
 #include "lex.yy.c"
