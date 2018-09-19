@@ -46,24 +46,28 @@ extern int yydebug;
   enum yytokentype
   {
     TK_NUM = 258,
-    TK_MAIN = 259,
-    TK_ID = 260,
-    TK_TIPO_INT = 261,
-    TK_TIPO_REAL = 262,
-    TK_REAL = 263,
-    TK_FIM = 264,
-    TK_ERROR = 265
+    TK_REAL = 259,
+    TK_BOOL = 260,
+    TK_MAIN = 261,
+    TK_ID = 262,
+    TK_TIPO_INT = 263,
+    TK_TIPO_REAL = 264,
+    TK_TIPO_BOOL = 265,
+    TK_FIM = 266,
+    TK_ERROR = 267
   };
 #endif
 /* Tokens.  */
 #define TK_NUM 258
-#define TK_MAIN 259
-#define TK_ID 260
-#define TK_TIPO_INT 261
-#define TK_TIPO_REAL 262
-#define TK_REAL 263
-#define TK_FIM 264
-#define TK_ERROR 265
+#define TK_REAL 259
+#define TK_BOOL 260
+#define TK_MAIN 261
+#define TK_ID 262
+#define TK_TIPO_INT 263
+#define TK_TIPO_REAL 264
+#define TK_TIPO_BOOL 265
+#define TK_FIM 266
+#define TK_ERROR 267
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

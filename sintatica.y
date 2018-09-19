@@ -91,8 +91,8 @@ string genTemp();
 string genNumId();
 %}
 
-%token TK_NUM
-%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_REAL
+%token TK_NUM TK_REAL TK_BOOL
+%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL
 %token TK_FIM TK_ERROR
 
 %start S
@@ -144,6 +144,26 @@ COMANDO 	: ID '=' E ';'
 				//$1.traducao = simb.temp;
 
 				$$.traducao =  $3.traducao + "\t" + simb.temp + " = " + $3.label + ";\n";
+			}
+			| TK_TIPO_BOOL ID '=' TK_BOOL ';'
+			{
+				string idTemp = genTemp();
+
+				if (!existeId($2.label))
+					insereSimbolo($2.label, $1.tipo, idTemp);
+				else
+				{
+					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
+					exit(1);	
+				}
+
+				//$1.tipo = simb.tipo;
+				//$1.traducao = simb.temp;
+
+				//$$.traducao =  $3.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $3.label + ";\n"
+				//+ $4.traducao + "\t" + idTemp + " = " + $4.label + ";\n";
+
+				$$.traducao = "\t" + $1.label + " " + $2.label + " = " + $4.label + ";\n"; 
 			}
 			//Inicialização com expressão
 			| TIPO ID '=' E ';'
