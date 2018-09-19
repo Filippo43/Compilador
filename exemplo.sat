@@ -1,6 +1,5 @@
 int main()
 {
-	int temp0;
-	
-	temp0 = 3 + 2 - 1;
+	int c = 3 + 4;
 }
+

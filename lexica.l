@@ -24,11 +24,14 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "int"		{return TK_TIPO_INT;}
 
+"real"		{return TK_TIPO_REAL;}
+
 [(){}[\];,=]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
+{REAL}		{ yylval.label = yytext; return TK_REAL; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
 
 .			{ *yytext; }
