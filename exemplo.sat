@@ -1,5 +1,5 @@
 int main()
 {
-	bool a = true;
+	real a = 3.0 * 2;
 }
 

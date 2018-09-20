@@ -528,8 +528,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   106,   106,   115,   123,   129,   134,   148,   169,   187,
-     211,   216,   221,   226,   231,   253,   265,   276,   287,   301
+       0,   106,   106,   115,   123,   129,   134,   148,   169,   199,
+     223,   228,   233,   238,   258,   280,   292,   303,   314,   328
 };
 #endif
 
@@ -1404,6 +1404,18 @@ yyreduce:
   case 8:
 #line 170 "sintatica.y" /* yacc.c:1646  */
     {
+
+				//Verifica Tipo de ID com o tipo do E
+				if (!(yyvsp[-4]).tipo.compare("int") && (yyvsp[-1]).tipo.compare("int"))	//Se a atribuição é real, não pode receber real
+				{
+					cout << "\tErro: Não é possível converter de real para int\n";
+					cout << "\t******* " + (yyvsp[-4]).tipo + " " + (yyvsp[-3]).label + " espera um real\n";
+
+					exit(1);
+				}
+
+				
+				
 				string idTemp = genTemp();
 
 				if (!existeId((yyvsp[-3]).label))
@@ -1417,14 +1429,14 @@ yyreduce:
 				//$1.tipo = simb.tipo;
 				//$1.traducao = simb.temp;
 
-				(yyval).traducao =  (yyvsp[-2]).traducao + "\t" + (yyvsp[-4]).tipo + " " + idTemp + " = " + (yyvsp[-2]).label + ";\n"
-				+ (yyvsp[-1]).traducao + "\t" + idTemp + " = " + (yyvsp[-1]).label + ";\n";
+				(yyval).traducao =  (yyvsp[-1]).traducao + "\t" + (yyvsp[-4]).tipo + " " + idTemp + " = " + (yyvsp[-1]).label + ";\n";
+				//+  "\t" + idTemp + " = " + $4.label + ";\n";
 			}
-#line 1424 "y.tab.c" /* yacc.c:1646  */
+#line 1436 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 188 "sintatica.y" /* yacc.c:1646  */
+#line 200 "sintatica.y" /* yacc.c:1646  */
     {
 
 				string idTemp = genTemp();
@@ -1446,46 +1458,61 @@ yyreduce:
 				insertmapa($1.tipo, $2.label, genTemp());*/
 				(yyval).traducao = "\t" + (yyvsp[-2]).tipo + " " + idTemp + ";\n";
 			}
-#line 1450 "y.tab.c" /* yacc.c:1646  */
+#line 1462 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 212 "sintatica.y" /* yacc.c:1646  */
+#line 224 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).tipo = "int";
 				//$$.traducao = "int";
 			}
-#line 1459 "y.tab.c" /* yacc.c:1646  */
+#line 1471 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 217 "sintatica.y" /* yacc.c:1646  */
+#line 229 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).tipo = "real";
 			}
-#line 1467 "y.tab.c" /* yacc.c:1646  */
+#line 1479 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 222 "sintatica.y" /* yacc.c:1646  */
+#line 234 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = genTemp();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " / " + (yyvsp[0]).label + ";\n";
 			}
-#line 1476 "y.tab.c" /* yacc.c:1646  */
+#line 1488 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 227 "sintatica.y" /* yacc.c:1646  */
+#line 239 "sintatica.y" /* yacc.c:1646  */
     {
-				(yyval).label = genTemp();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " * " + (yyvsp[0]).label + ";\n";
+				string temp = genTemp();
+
+				string tipo = (yyvsp[-2]).tipo;
+
+				//Se o tipo de algum E é real
+				if (!(yyvsp[-2]).tipo.compare("real") || !(yyvsp[0]).tipo.compare("real"))
+					tipo = "real";
+
+				insereSimbolo(genNumId(), tipo, temp);
+				(yyval).tipo = tipo;
+
+
+				//$$.label = genTemp();
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + 
+				"\t" + tipo + " " + temp + " = " + (yyvsp[-2]).label + " * " + (yyvsp[0]).label + ";\n";
+
+				(yyval).label = temp;
 			}
-#line 1485 "y.tab.c" /* yacc.c:1646  */
+#line 1512 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 232 "sintatica.y" /* yacc.c:1646  */
+#line 259 "sintatica.y" /* yacc.c:1646  */
     {
 				string temp = genTemp();
 
@@ -1507,11 +1534,11 @@ yyreduce:
 
 				(yyval).label = temp;
 			}
-#line 1511 "y.tab.c" /* yacc.c:1646  */
+#line 1538 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 254 "sintatica.y" /* yacc.c:1646  */
+#line 281 "sintatica.y" /* yacc.c:1646  */
     {
 				string temp = genTemp();
 
@@ -1523,41 +1550,41 @@ yyreduce:
 
 				(yyval).label = temp;
 			}
-#line 1527 "y.tab.c" /* yacc.c:1646  */
+#line 1554 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 266 "sintatica.y" /* yacc.c:1646  */
+#line 293 "sintatica.y" /* yacc.c:1646  */
     {
-				string id = genNumId();
-				string temp = genTemp();
+				//string id = genNumId();
+				//string temp = genTemp();
 
-				insereSimbolo(id,"int",temp);
+				//insereSimbolo(id,"int",temp);
 
 				(yyval).tipo = "int";
-				(yyval).traducao = "\tint " + temp + " = " + (yyvsp[0]).label + ";\n";
-				(yyval).label = temp;
+				//$$.traducao = "\tint " + temp + " = " + $1.label + ";\n";
+				(yyval).label = (yyvsp[0]).label;
 			}
-#line 1542 "y.tab.c" /* yacc.c:1646  */
+#line 1569 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 277 "sintatica.y" /* yacc.c:1646  */
+#line 304 "sintatica.y" /* yacc.c:1646  */
     {
-				string id = genNumId();
-				string temp = genTemp();
+				//string id = genNumId();
+				//string temp = genTemp();
 
-				insereSimbolo(id,"real",temp);
+				//insereSimbolo(id,"real",temp);
 
 				(yyval).tipo = "real";
-				(yyval).traducao = "\treal " + temp + " = " + (yyvsp[0]).label + ";\n";
-				(yyval).label = temp;
+				//$$.traducao = "\treal " + temp + " = " + $1.label + ";\n";
+				(yyval).label = (yyvsp[0]).label;
 			}
-#line 1557 "y.tab.c" /* yacc.c:1646  */
+#line 1584 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 288 "sintatica.y" /* yacc.c:1646  */
+#line 315 "sintatica.y" /* yacc.c:1646  */
     {
 				//Busca no mapa
 				simbolo simb;
@@ -1570,21 +1597,21 @@ yyreduce:
 				(yyval).label = simb.temp; 
 				//$$.traducao = "\t" + $$.tipo + "" + $$.label + " = " + $1.label + ";\n";
 			}
-#line 1574 "y.tab.c" /* yacc.c:1646  */
+#line 1601 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 302 "sintatica.y" /* yacc.c:1646  */
+#line 329 "sintatica.y" /* yacc.c:1646  */
     {
 				//$$.label = genTemp(); 
 				//Atribuir se a temporária existe
 				(yyval).label = (yyvsp[0]).label;
 			}
-#line 1584 "y.tab.c" /* yacc.c:1646  */
+#line 1611 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1588 "y.tab.c" /* yacc.c:1646  */
+#line 1615 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1812,7 +1839,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 309 "sintatica.y" /* yacc.c:1906  */
+#line 336 "sintatica.y" /* yacc.c:1906  */
 
 
 #include "lex.yy.c"

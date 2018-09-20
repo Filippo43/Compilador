@@ -168,6 +168,18 @@ COMANDO 	: ID '=' E ';'
 			//Inicialização com expressão
 			| TIPO ID '=' E ';'
 			{
+
+				//Verifica Tipo de ID com o tipo do E
+				if (!$1.tipo.compare("int") && $4.tipo.compare("int"))	//Se a atribuição é real, não pode receber real
+				{
+					cout << "\tErro: Não é possível converter de real para int\n";
+					cout << "\t******* " + $1.tipo + " " + $2.label + " espera um real\n";
+
+					exit(1);
+				}
+
+				
+				
 				string idTemp = genTemp();
 
 				if (!existeId($2.label))
@@ -181,8 +193,8 @@ COMANDO 	: ID '=' E ';'
 				//$1.tipo = simb.tipo;
 				//$1.traducao = simb.temp;
 
-				$$.traducao =  $3.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $3.label + ";\n"
-				+ $4.traducao + "\t" + idTemp + " = " + $4.label + ";\n";
+				$$.traducao =  $4.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $4.label + ";\n";
+				//+  "\t" + idTemp + " = " + $4.label + ";\n";
 			}
 			| TIPO ID ';'
 			{
@@ -225,8 +237,23 @@ E 			: E '/' E
 			}
 			| E '*' E
 			{
-				$$.label = genTemp();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
+				string temp = genTemp();
+
+				string tipo = $1.tipo;
+
+				//Se o tipo de algum E é real
+				if (!$1.tipo.compare("real") || !$3.tipo.compare("real"))
+					tipo = "real";
+
+				insereSimbolo(genNumId(), tipo, temp);
+				$$.tipo = tipo;
+
+
+				//$$.label = genTemp();
+				$$.traducao = $1.traducao + $3.traducao + 
+				"\t" + tipo + " " + temp + " = " + $1.label + " * " + $3.label + ";\n";
+
+				$$.label = temp;
 			}
 			| E '+' E
 			{
@@ -264,25 +291,25 @@ E 			: E '/' E
 			}
 			| TK_NUM
 			{
-				string id = genNumId();
-				string temp = genTemp();
+				//string id = genNumId();
+				//string temp = genTemp();
 
-				insereSimbolo(id,"int",temp);
+				//insereSimbolo(id,"int",temp);
 
 				$$.tipo = "int";
-				$$.traducao = "\tint " + temp + " = " + $1.label + ";\n";
-				$$.label = temp;
+				//$$.traducao = "\tint " + temp + " = " + $1.label + ";\n";
+				$$.label = $1.label;
 			}
 			| TK_REAL
 			{
-				string id = genNumId();
-				string temp = genTemp();
+				//string id = genNumId();
+				//string temp = genTemp();
 
-				insereSimbolo(id,"real",temp);
+				//insereSimbolo(id,"real",temp);
 
 				$$.tipo = "real";
-				$$.traducao = "\treal " + temp + " = " + $1.label + ";\n";
-				$$.label = temp;
+				//$$.traducao = "\treal " + temp + " = " + $1.label + ";\n";
+				$$.label = $1.label;
 			}
 			| TK_ID
 			{
