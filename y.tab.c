@@ -1383,7 +1383,7 @@ yyreduce:
 				string idTemp = genTemp();
 
 				if (!existeId((yyvsp[-3]).label))
-					insereSimbolo((yyvsp[-3]).label, (yyvsp[-4]).tipo, idTemp);
+					insereSimbolo((yyvsp[-3]).label, "bool", idTemp);
 				else
 				{
 					cout << "\tErro: Redeclaração do " + (yyvsp[-3]).label + "\n";	
@@ -1396,7 +1396,7 @@ yyreduce:
 				//$$.traducao =  $3.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $3.label + ";\n"
 				//+ $4.traducao + "\t" + idTemp + " = " + $4.label + ";\n";
 
-				(yyval).traducao = "\t" + (yyvsp[-4]).label + " " + (yyvsp[-3]).label + " = " + (yyvsp[-1]).label + ";\n"; 
+				(yyval).traducao = "\tbool " + idTemp + " = " + (yyvsp[-1]).label + ";\n"; 
 			}
 #line 1402 "y.tab.c" /* yacc.c:1646  */
     break;

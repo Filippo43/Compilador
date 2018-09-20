@@ -150,7 +150,7 @@ COMANDO 	: ID '=' E ';'
 				string idTemp = genTemp();
 
 				if (!existeId($2.label))
-					insereSimbolo($2.label, $1.tipo, idTemp);
+					insereSimbolo($2.label, "bool", idTemp);
 				else
 				{
 					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
@@ -163,7 +163,7 @@ COMANDO 	: ID '=' E ';'
 				//$$.traducao =  $3.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $3.label + ";\n"
 				//+ $4.traducao + "\t" + idTemp + " = " + $4.label + ";\n";
 
-				$$.traducao = "\t" + $1.label + " " + $2.label + " = " + $4.label + ";\n"; 
+				$$.traducao = "\tbool " + idTemp + " = " + $4.label + ";\n"; 
 			}
 			//Inicialização com expressão
 			| TIPO ID '=' E ';'

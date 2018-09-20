@@ -11,7 +11,7 @@ BOOLEANA (true|false)
 ATRIB {=}
 DELIM {ESPACO}+
 NUM {DIGITO}+
-BOOL {BOOLEANA}
+BOOLE {BOOLEANA}
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 ID {LETRA}({LETRA}|{NUM})*
@@ -36,8 +36,9 @@ ID {LETRA}({LETRA}|{NUM})*
 
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; return TK_REAL; }
+{BOOLE}		{ yylval.label = yytext; return TK_BOOL; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
-{BOOL}		{ yylval.label = yytext; return TK_BOOL; }
+
 
 .			{ *yytext; }
 

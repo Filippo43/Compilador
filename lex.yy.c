@@ -362,10 +362,10 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[41] =
     {   0,
-        0,    0,   15,   13,    2,    1,    7,    8,    9,   11,
-       11,   11,   11,   11,   11,   11,    2,    0,    9,   11,
-       11,   11,   11,   11,   11,   11,   11,   10,   11,   11,
-        4,   11,   11,   11,    5,   11,    3,    6,   11,    0
+        0,    0,   15,   13,    2,    1,    7,    8,    9,   12,
+       12,   12,   12,   12,   12,   12,    2,    0,    9,   12,
+       12,   12,   12,   12,   12,   12,   12,   10,   12,   12,
+        4,   12,   12,   12,    5,   12,    3,    6,   11,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -805,21 +805,21 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 #line 39 "lexica.l"
-{ yylval.label = yytext; return TK_ID; }
+{ yylval.label = yytext; return TK_BOOL; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 40 "lexica.l"
-{ yylval.label = yytext; return TK_BOOL; }
+{ yylval.label = yytext; return TK_ID; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 42 "lexica.l"
+#line 43 "lexica.l"
 { *yytext; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "lexica.l"
+#line 45 "lexica.l"
 ECHO;
 	YY_BREAK
 #line 826 "lex.yy.c"
@@ -1827,6 +1827,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 44 "lexica.l"
+#line 45 "lexica.l"
 
 
