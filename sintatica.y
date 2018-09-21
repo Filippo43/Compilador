@@ -9,15 +9,11 @@
 
 using namespace std;
 
-//Criar o vector de struct simbolos
-
-//funcoes: exite id? inseresimbolo e buscasimbolo
-
-struct simbolo
+struct variavel
 {
-	string id;
+	string nome;
 	string tipo;
-	string temp;
+	string identificacao;
 };
 
 struct atributos
@@ -27,32 +23,33 @@ struct atributos
 	string tipo;
 };
 
-vector<simbolo> tabelaSimbolos;
+vector<variavel> tabelaVariaveis;
 
-//Insere símbolo na tabela de símbolos
-void insereSimbolo(string id, string tipo, string temp)
+//Insere símbolo na tabela de variáveis
+void insereVariavel(string nome, string tipo, string identificacao)
 {
-	simbolo novoSimbolo;
-	novoSimbolo.id = id;
-	novoSimbolo.tipo = tipo;
-	novoSimbolo.temp = temp;
+	variavel novaVariavel;
+	novaVariavel.nome = nome;
+	novaVariavel.tipo = tipo;
+	novaVariavel.identificacao = identificacao;
 
-	tabelaSimbolos.push_back(novoSimbolo);
+	tabelaVariaveis.push_back(novaVariavel);
 }
 
-bool existeId(string id)
+//Verifica se existe um nome na tabela de variáveis
+bool existeNome(string nome)
 {
 
-	if (tabelaSimbolos.size() == 0)
+	if (tabelaVariaveis.size() == 0)
 			return false;
 	
 
-	for(std::vector<simbolo>::iterator it = tabelaSimbolos.begin(); it != tabelaSimbolos.end(); it++)    
+	for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
 	{
 
-		simbolo temp = *it;
+		variavel temp = *it;
 
-		if (!temp.id.compare(id))
+		if (!temp.nome.compare(nome))
 			return true;
     
 	}
@@ -60,22 +57,39 @@ bool existeId(string id)
 	return false;
 }
 
-
-bool buscaSimbolo(string id, simbolo &simb)
+//Verifica qual o tipo resultante de uma operação entre dois tipos
+string tipoResultanteExpressaoAritimetica(string tipo1, string tipo2)
 {
 
-	if (tabelaSimbolos.size() == 0)
+	//Se os tipos são iguais
+	if (!tipo1.compare(tipo2))
+		return tipo1;
+
+	else if ((!tipo1.compare("real") && !tipo2.compare("int"))
+	|| (!tipo1.compare("int") && !tipo2.compare("real")))	//Generalizando
+		return "real";
+
+	else
+		return "erro";
+
+}
+
+
+bool buscaVariavel(string nome, variavel &var)
+{
+
+	if (tabelaVariaveis.size() == 0)
 			return false;
 	
 
-	for(std::vector<simbolo>::iterator it = tabelaSimbolos.begin(); it != tabelaSimbolos.end(); it++)    
+	for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
 	{
 
-		simbolo temp = *it;
+		variavel temp = *it;
 
-		if (!temp.id.compare(id))
+		if (!temp.nome.compare(nome))
 		{
-			simb = temp;
+			var = temp;
 			return true;
 		}
     
@@ -88,12 +102,12 @@ bool buscaSimbolo(string id, simbolo &simb)
 int yylex(void);
 void yyerror(string);
 string genTemp();
-string genNumId();
+string genNomeGen();
 %}
 
-%token TK_NUM TK_REAL TK_BOOL
-%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL
-%token TK_FIM TK_ERROR
+%token TK_NUM TK_REAL TK_BOOL TK_CHAR
+%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
+%token TK_FIM TK_ERROR 
 
 %start S
 
@@ -105,10 +119,7 @@ string genNumId();
 
 S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				//string declaracao = "\tint temp1;";
-				//for (int = 0)
 				cout << "int main (void)\n{\n" + $5.traducao + "}\n";
-				cout << tabelaSimbolos.size();
 			}
 			;
 
@@ -116,7 +127,6 @@ BLOCO		: '{' COMANDOS '}'
 			{
 				$$.traducao = $2.traducao;
 
-				//cout << $$.traducao, $2.traducao;
 			}
 			;
 
@@ -131,99 +141,218 @@ COMANDOS	: COMANDO COMANDOS
 			}
 			;
 
-COMANDO 	: ID '=' E ';'
+			//Atribuição já declarada
+COMANDO 	: TK_ID '=' E ';'
 			{
-				simbolo simb;
-				if (!buscaSimbolo($1.label, simb))
+
+				//Variável de nome ID
+				variavel var;
+
+				//Busca na tabela se existe variável com o nome de ID
+				if (!buscaVariavel($1.label, var))
 				{
+					//Sinaliza erro
 					cout << "\tErro: " + $1.label + " não declarado\n";
 					exit(1);
 				}
 
-				//$1.tipo = simb.tipo;
-				//$1.traducao = simb.temp;
+				//Verifica Tipo de ID com o tipo do E
+				if ((!var.tipo.compare("int") && $3.tipo.compare("int"))	//Se TK_ID é int e E não é int, acusa erro
+				|| !var.tipo.compare("bool") //Se TK_ID é bool, não é permitido operações
+				|| !var.tipo.compare("char") )//Se TK_ID é char, não é permitido operações
+				{
+					cout << "\tErro: Não é possível converter de " + $3.tipo + " " +  "para " + var.tipo + "\n";
+					cout << "\t******* \"" + var.nome +  "\" espera um " + var.tipo + "\n";
 
-				$$.traducao =  $3.traducao + "\t" + simb.temp + " = " + $3.label + ";\n";
+					exit(1);
+				}
+
+				//Transfere para tradução de comando a tradução
+				$$.traducao =  $3.traducao + "\t" + var.identificacao + " = " + $3.label + ";\n";
 			}
-			| TK_TIPO_BOOL ID '=' TK_BOOL ';'
-			{
-				string idTemp = genTemp();
 
-				if (!existeId($2.label))
-					insereSimbolo($2.label, "bool", idTemp);
+			//Declaração de char
+			| TK_TIPO_CHAR ID ';'
+			{
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+
+				//Verifica se o nome já existe pois seria uma redeclaração
+				if (!existeNome($2.label))
+					insereVariavel($2.label, "char", nomeTemp);
 				else
 				{
 					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
 					exit(1);	
 				}
 
-				//$1.tipo = simb.tipo;
-				//$1.traducao = simb.temp;
-
-				//$$.traducao =  $3.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $3.label + ";\n"
-				//+ $4.traducao + "\t" + idTemp + " = " + $4.label + ";\n";
-
-				$$.traducao = "\tbool " + idTemp + " = " + $4.label + ";\n"; 
+				$$.traducao = "\tchar " + nomeTemp + ";\n";
 			}
+
+			//Atribuição Char
+			| TK_ID '=' TK_CHAR';'
+			{
+
+				//Variável de nome ID
+				variavel var;
+
+				//Busca na tabela se existe variável com o nome de ID
+				if (!buscaVariavel($1.label, var))
+				{
+					//Sinaliza erro
+					cout << "\tErro: " + $1.label + " não declarado\n";
+					exit(1);
+				}
+
+
+				if (var.tipo.compare("char"))
+				{
+					cout << "\tErro: \"" + $1.label + "\" não é do tipo bool\n";
+					exit(1);
+				}
+
+				$$.traducao = "\t" + var.identificacao + " = " + $4.label + ";\n";
+			}
+
+
+			//Declaração de char com atribuição
+			| TK_TIPO_CHAR ID '=' TK_CHAR ';'
+			{
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+
+				//Verifica se não existe variável com esse nome para não haver redeclaração
+				if (!existeNome($2.label))
+					insereVariavel($2.label, "char", nomeTemp);
+				else
+				{
+					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
+					exit(1);	
+				}
+
+				//Passa para comando a tradução
+				$$.traducao = "\tchar " + nomeTemp + " = " + $4.label + ";\n"; 
+			}
+
+
+			//Declaração de Booleana co atribuição
+			| TK_TIPO_BOOL ID '=' TK_BOOL ';'
+			{
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+
+				//Verifica se não existe variável com esse nome para não haver redeclaração
+				if (!existeNome($2.label))
+					insereVariavel($2.label, "bool", nomeTemp);
+				else
+				{
+					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
+					exit(1);	
+				}
+
+				//Passa para comando a tradução
+				$$.traducao = "\tbool " + nomeTemp + " = " + $4.label + ";\n"; 
+			}
+
+			//Declaração de Booleana
+			| TK_TIPO_BOOL ID ';'
+			{
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+
+				//Verifica se o nome já existe pois seria uma redeclaração
+				if (!existeNome($2.label))
+					insereVariavel($2.label, "bool", nomeTemp);
+				else
+				{
+					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
+					exit(1);	
+				}
+
+				$$.traducao = "\tbool " + nomeTemp + ";\n";
+			}
+
+			//Atribuição Booleana
+			| TK_ID '=' TK_BOOL';'
+			{
+
+				//Variável de nome ID
+				variavel var;
+
+				//Busca na tabela se existe variável com o nome de ID
+				if (!buscaVariavel($1.label, var))
+				{
+					//Sinaliza erro
+					cout << "\tErro: " + $1.label + " não declarado\n";
+					exit(1);
+				}
+
+
+				if (var.tipo.compare("bool"))
+				{
+					cout << "\tErro: \"" + $1.label + "\" não é do tipo bool\n";
+					exit(1);
+				}
+
+				$$.traducao = "\t" + var.identificacao + " = " + $4.label + ";\n";
+			}
+
 			//Inicialização com expressão
 			| TIPO ID '=' E ';'
 			{
 
 				//Verifica Tipo de ID com o tipo do E
-				if (!$1.tipo.compare("int") && $4.tipo.compare("int"))	//Se a atribuição é real, não pode receber real
+				if (!$1.tipo.compare("int") && $4.tipo.compare("int"))	//Se TIPO é int e E não é int, acusa erro
 				{
-					cout << "\tErro: Não é possível converter de real para int\n";
-					cout << "\t******* " + $1.tipo + " " + $2.label + " espera um real\n";
+					cout << "\tErro: Não é possível converter de " + $4.tipo + " " +  "para int\n";
+					cout << "\t******* \"" + $2.label + "\" espera um " + $1.tipo + "\n";
 
 					exit(1);
 				}
 
-				
-				
+						
+				//Cria variável temporária
 				string idTemp = genTemp();
 
-				if (!existeId($2.label))
-					insereSimbolo($2.label, $1.tipo, idTemp);
+				//Verifica se já existe o nome para não redeclarar
+				if (!existeNome($2.label))
+					insereVariavel($2.label, $1.tipo, idTemp);
 				else
 				{
 					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
 					exit(1);	
 				}
 
-				//$1.tipo = simb.tipo;
-				//$1.traducao = simb.temp;
-
 				$$.traducao =  $4.traducao + "\t" + $1.tipo + " " + idTemp + " = " + $4.label + ";\n";
-				//+  "\t" + idTemp + " = " + $4.label + ";\n";
+	
 			}
+			//Declaração
 			| TIPO ID ';'
 			{
 
-				string idTemp = genTemp();
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
 
-				if (!existeId($2.label))
-					insereSimbolo($2.label, $1.tipo, idTemp);
+				//Verifica se o nome já existe pois seria uma redeclaração
+				if (!existeNome($2.label))
+					insereVariavel($2.label, $1.tipo, nomeTemp);
 				else
 				{
 					cout << "\tErro: Redeclaração do " + $2.label + "\n";	
 					exit(1);	
 				}
 
-				//$2.traducao = idTemp;
-				//$2.tipo = $1.traducao;
-			/*	if(verificamapa($2.label))
-				{
-					erro
-				}
-				insertmapa($1.tipo, $2.label, genTemp());*/
-				$$.traducao = "\t" + $1.tipo + " " + idTemp + ";\n";
+				$$.traducao = "\t" + $1.tipo + " " + nomeTemp + ";\n";
 			}
 			;
 
 TIPO        : TK_TIPO_INT 
 			{
 				$$.tipo = "int";
-				//$$.traducao = "int";
 			}
 			| TK_TIPO_REAL
 			{
@@ -232,103 +361,154 @@ TIPO        : TK_TIPO_INT
 			;
 E 			: E '/' E
 			{
-				$$.label = genTemp();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
+				//Criação de variável temporária
+				string nometemp = genTemp();
+
+				//Armazena o tipo do resultado da expressão
+				string tipo = tipoResultanteExpressaoAritimetica($1.tipo, $3.tipo);
+
+				//Verifica se deu erro de conversão
+				if (!tipo.compare("erro"))
+				{
+					cout << "\tErro: " + $1.tipo + " e " + $3.tipo + " não são compatíveis!" + "\n";	
+					exit(1);
+				}
+				
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), tipo, nometemp);
+
+				//Guarda o tipo da Expressão resultante em E
+				$$.tipo = tipo;
+
+
+				//Passa para E a tradução
+				$$.traducao = $1.traducao + $3.traducao + 
+				"\t" + tipo + " " + nometemp + " = " + $1.label + " / " + $3.label + ";\n";
+
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
 			}
 			| E '*' E
 			{
-				string temp = genTemp();
+				//Criação de variável temporária
+				string nometemp = genTemp();
 
-				string tipo = $1.tipo;
+				//Armazena o tipo do resultado da expressão
+				string tipo = tipoResultanteExpressaoAritimetica($1.tipo, $3.tipo);
 
-				//Se o tipo de algum E é real
-				if (!$1.tipo.compare("real") || !$3.tipo.compare("real"))
-					tipo = "real";
+				//Verifica se deu erro de conversão
+				if (!tipo.compare("erro"))
+				{
+					cout << "\tErro: " + $1.tipo + " e " + $3.tipo + " não são compatíveis!" + "\n";	
+					exit(1);
+				}
+				
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), tipo, nometemp);
 
-				insereSimbolo(genNumId(), tipo, temp);
+				//Guarda o tipo da Expressão resultante em E
 				$$.tipo = tipo;
 
 
-				//$$.label = genTemp();
+				//Passa para E a tradução
 				$$.traducao = $1.traducao + $3.traducao + 
-				"\t" + tipo + " " + temp + " = " + $1.label + " * " + $3.label + ";\n";
+				"\t" + tipo + " " + nometemp + " = " + $1.label + " * " + $3.label + ";\n";
 
-				$$.label = temp;
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
+
 			}
 			| E '+' E
 			{
-				string temp = genTemp();
+				//Criação de variável temporária
+				string nometemp = genTemp();
 
-				string tipo = "";
+				//Armazena o tipo do resultado da expressão
+				string tipo = tipoResultanteExpressaoAritimetica($1.tipo, $3.tipo);
 
-				//Se o tipo de algum E é real
-				if (!$1.tipo.compare("real") || !$3.tipo.compare("real"))
-					tipo = "real";
-				else
-					tipo = "int";
+				//Verifica se deu erro de conversão
+				if (!tipo.compare("erro"))
+				{
+					cout << "\tErro: " + $1.tipo + " e " + $3.tipo + " não são compatíveis!" + "\n";	
+					exit(1);
+				}
+				
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), tipo, nometemp);
 
-				insereSimbolo(genNumId(), tipo, temp);
+				//Guarda o tipo da Expressão resultante em E
 				$$.tipo = tipo;
 
 
-				//$$.label = genTemp();
+				//Passa para E a tradução
 				$$.traducao = $1.traducao + $3.traducao + 
-				"\t" + tipo + " " + temp + " = " + $1.label + " + " + $3.label + ";\n";
+				"\t" + tipo + " " + nometemp + " = " + $1.label + " + " + $3.label + ";\n";
 
-				$$.label = temp;
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
 			}
 			| E '-' E
 			{
-				string temp = genTemp();
+				//Criação de variável temporária
+				string nometemp = genTemp();
 
-				insereSimbolo(genNumId(), "int", temp);
+				//Armazena o tipo do resultado da expressão
+				string tipo = tipoResultanteExpressaoAritimetica($1.tipo, $3.tipo);
 
-				//$$.label = genTemp();
+				//Verifica se deu erro de conversão
+				if (!tipo.compare("erro"))
+				{
+					cout << "\tErro: " + $1.tipo + " e " + $3.tipo + " não são compatíveis!" + "\n";	
+					exit(1);
+				}
+				
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), tipo, nometemp);
+
+				//Guarda o tipo da Expressão resultante em E
+				$$.tipo = tipo;
+
+
+				//Passa para E a tradução
 				$$.traducao = $1.traducao + $3.traducao + 
-				"\t" + "int " + temp + " = " + $1.label + " - " + $3.label + ";\n";
+				"\t" + tipo + " " + nometemp + " = " + $1.label + " - " + $3.label + ";\n";
 
-				$$.label = temp;
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
+
 			}
 			| TK_NUM
 			{
-				//string id = genNumId();
-				//string temp = genTemp();
-
-				//insereSimbolo(id,"int",temp);
-
+				//Passa para E o tipo e seu valor
 				$$.tipo = "int";
-				//$$.traducao = "\tint " + temp + " = " + $1.label + ";\n";
 				$$.label = $1.label;
 			}
 			| TK_REAL
 			{
-				//string id = genNumId();
-				//string temp = genTemp();
-
-				//insereSimbolo(id,"real",temp);
-
+				//Passa para E o tipo e seu valor
 				$$.tipo = "real";
-				//$$.traducao = "\treal " + temp + " = " + $1.label + ";\n";
 				$$.label = $1.label;
 			}
+			//Uso de IDs do lado direito da expressão
 			| TK_ID
 			{
-				//Busca no mapa
-				simbolo simb;
-				if (!buscaSimbolo($1.label, simb))
+				//Busca na tabela
+				variavel var;
+				//se retorna falso, não foi declarada a variável TK_ID
+				if (!buscaVariavel($1.label, var))
 				{
 					cout << "\tErro: " + $1.label + " não declarado\n";
 					exit(1);
 				}
-				$$.tipo = simb.tipo;
-				$$.label = simb.temp; 
-				//$$.traducao = "\t" + $$.tipo + "" + $$.label + " = " + $1.label + ";\n";
-			}
+
+				//Passa o tipo e o nome para E
+				$$.tipo = var.tipo;
+				$$.label = var.identificacao; 
+				}
 			;
 ID		: TK_ID
 			{
-				//$$.label = genTemp(); 
-				//Atribuir se a temporária existe
+				//Passa seu nome literal para ID
 				$$.label = $1.label;
 			}
 			;
@@ -339,15 +519,16 @@ ID		: TK_ID
 
 int yyparse();
 
-int num_temp = 0;
-int numGenId = 0;
+int tempGenQtt = 0;
+int nomeGenQtt = 0;
+
 string genTemp()
 {
-	return "temp" + to_string(num_temp++);
+	return "temp" + to_string(tempGenQtt++);
 }
-string genNumId()
+string genNomeGen()
 {
-	return to_string(numGenId++);
+	return to_string(nomeGenQtt++);
 }
 int main( int argc, char* argv[] )
 {

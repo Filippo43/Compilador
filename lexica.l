@@ -8,13 +8,15 @@ DIGITO [0-9]
 LETRA [A-Za-z_]
 BOOLEANA (true|false)
 
+
 ATRIB {=}
 DELIM {ESPACO}+
 NUM {DIGITO}+
-BOOLE {BOOLEANA}
+BOOL {BOOLEANA}
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 ID {LETRA}({LETRA}|{NUM})*
+
 
 %%
 
@@ -28,15 +30,19 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "bool"		{return TK_TIPO_BOOL;}
 
+"char"		{return TK_TIPO_CHAR;}
+
 "real"		{return TK_TIPO_REAL;}
 
 [(){}[\];,=]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
+
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
+{CHAR}		{ yylval.label = yytext; return TK_CHAR; }
 {REAL}		{ yylval.label = yytext; return TK_REAL; }
-{BOOLE}		{ yylval.label = yytext; return TK_BOOL; }
+{BOOL}		{ yylval.label = yytext; return TK_BOOL; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
 
 

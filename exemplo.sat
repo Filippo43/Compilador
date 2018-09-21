@@ -1,5 +1,7 @@
 int main()
 {
-	real a = 3.0 * 2;
+	char a = 'a';
+	char b;
+	b = 'c';
 }
 
