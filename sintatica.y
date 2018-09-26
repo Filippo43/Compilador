@@ -260,6 +260,12 @@ OPATRIB		: '=' TK_CHAR
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
 			}
+			| '=' EL
+			{
+				$$.label = $2.label;
+				$$.traducao = $2.traducao;
+				$$.tipo = $2.tipo;
+			}
 			|
 			{
 				$$.tipo = "null";
@@ -332,33 +338,68 @@ TIPO 	    : TK_TIPO_INT
 				$$.tipo = "char";
 			}
 			;
-//Expresões Lógicas - A implementar
-/*EL 			: E '>' E
+//Expresões Lógicas
+EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 			{
+				//Criação de variável temporária
+				string nometemp = genTemp();
 
-			}
-			| E '>' '=' E
-			{
+				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), "bool", nometemp);
 
-			}
-			| E '<' E
-			{
+				//Guarda o tipo da Expressão resultante em E
+				$$.tipo = "bool";
 
-			}
-			| E '<' '=' E
-			{
+				//Passa para EL a tradução
+				$$.traducao = $1.traducao + $3.traducao 
 
-			}
-			| E '=' '=' E
-			{
+				+ "\t" + nometemp + " = " + $1.label + $2.traducao + $3.label + ";\n";
 
-			}
-			| E '!' '=' E
-			{
-
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
 			}
 			;
-*/
+
+OPNDOLOGIC	: E
+			{
+				$$.traducao = $1.traducao;
+				$$.tipo = $1.tipo;
+				$$.label = $1.label;
+			}
+			| TK_CHAR
+			{
+				$$.tipo = "char";
+				$$.label = $1.label;
+			}
+			;
+//Operadores Lógicos
+OPLOGIC		: '=' '='
+			{
+				$$.traducao = " == ";
+			}
+			| '!' '='
+			{
+				$$.traducao = " != ";
+			}
+			| '<' '='
+			{
+				$$.traducao = " <= ";
+			}
+			| '>' '='
+			{
+				$$.traducao = " >= ";
+			}
+			| '>'
+			{
+				$$.traducao = " > ";
+			}
+			| '<'
+			{
+				$$.traducao = " < ";
+			}
+			;
+
 E 			: E '/' E
 			{
 				//Verifica se a expressão é válida

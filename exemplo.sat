@@ -1,13 +1,9 @@
 int main()
 {
 	
-	real b = 3 * 3.0 + 2 / 5.0;
+	bool f;
 
-	char a = 'a';
-
-	int d = 2 + 3;
-
-	bool f = false;
+	f = f < 3;
 
 }
 

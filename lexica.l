@@ -34,7 +34,7 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "real"		{return TK_TIPO_REAL;}
 
-[(){}[\];,=]	{ return *yytext; }
+[(){}[\];,=<>!]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
