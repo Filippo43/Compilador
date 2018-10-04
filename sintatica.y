@@ -240,7 +240,7 @@ COMANDOS	: COMANDO COMANDOS
 			}
 			|
 			{
-				
+				$$.traducao = "";
 			}
 			;
 //Atribuições do lado direito
@@ -256,12 +256,14 @@ OPATRIB		: '=' TK_CHAR
 			}
 			| '=' E 
 			{
+
 				$$.label = $2.label;
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
 			}
 			| '=' EL
 			{
+				
 				$$.label = $2.label;
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
@@ -284,9 +286,14 @@ ATRIBUICAO 	: ID OPATRIB ';'
 				verificaAtribuicao(var.tipo, $2.tipo);
 				
 				//Verifica se teve atribuição
-				if ($3.tipo.compare("null"))
-					$$.traducao = $2.traducao + "\t" + var.identificacao + " = " + $2.label + ";\n";
-			
+				if ($2.tipo.compare("null"))
+				{
+					if (var.tipo.compare($2.tipo))
+						$$.traducao = $2.traducao + "\t" + var.identificacao + " = (" + var.tipo + ") " + $2.label + ";\n";
+					else
+						$$.traducao = $2.traducao + "\t" + var.identificacao + " = " + $2.label + ";\n";
+				}
+					
 			}
 			;
 //Declarações
@@ -304,7 +311,12 @@ DECLARACAO	: TIPO ID OPATRIB ';'
 
 				//Verifica se teve atribuição
 				if ($3.tipo.compare("null"))
-					$$.traducao =  $3.traducao + "\t" + nomeTemp + " = " + $3.label + ";\n";
+				{
+					if ($1.tipo.compare($3.tipo))
+						$$.traducao = $3.traducao + "\t" + nomeTemp + " = (" + $1.tipo + ") " + $3.label + ";\n";
+					else
+						$$.traducao = $3.traducao + "\t" + nomeTemp + " = " + $3.label + ";\n";
+				}
 			}
 			;
 
@@ -341,6 +353,7 @@ TIPO 	    : TK_TIPO_INT
 //Expresões Lógicas
 EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 			{
+
 				//Criação de variável temporária
 				string nometemp = genTemp();
 
@@ -352,8 +365,7 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 				$$.tipo = "bool";
 
 				//Passa para EL a tradução
-				$$.traducao = $1.traducao + $3.traducao 
-
+				$$.traducao = $1.traducao + $3.traducao
 				+ "\t" + nometemp + " = " + $1.label + $2.traducao + $3.label + ";\n";
 
 				//Passa para E seu valor de temporária
@@ -450,6 +462,7 @@ E 			: E '/' E
 			| E '+' E
 			{
 
+
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
 
@@ -465,7 +478,6 @@ E 			: E '/' E
 
 				//Passa para E a tradução
 				$$.traducao = $1.traducao + $3.traducao 
-				//+ "\t" + $1.tipo + " " + nometemp + ";\n"
 				+ "\t" + nometemp + " = " + $1.label + " + " + $3.label + ";\n";
 
 				//Passa para E seu valor de temporária
@@ -521,6 +533,27 @@ E 			: E '/' E
 				$$.tipo = var.tipo;
 				$$.label = var.identificacao; 
 			}
+			/*| '(' TIPO ')' TK_ID
+			{
+				//Busca na tabela
+				variavel var;
+				
+				//Tenta buscar a variável
+				buscaVariavel($4.label, var);
+
+				//Criação de variável temporária
+				string nometemp = genTemp();
+
+				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), $2.tipo, nometemp);
+
+				$$.traducao = "\t" + nometemp + " = (" + $2.tipo + ") " + var.identificacao + "\n";
+
+				//Passa o tipo e o nome para E
+				$$.tipo = $2.tipo;
+				$$.label = nometemp; 
+			}*/
 			;
 ID		: TK_ID
 			{

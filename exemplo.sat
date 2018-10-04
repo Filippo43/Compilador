@@ -1,9 +1,8 @@
 int main()
 {
 	
-	bool f;
+	int i = 2;
 
-	f = f < 3;
+	real a = i + 2;
 
 }
-
