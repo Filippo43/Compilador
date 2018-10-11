@@ -24,12 +24,27 @@ struct atributos
 	string tipo;
 };
 
-stack <variavel> pilhaContextoVariavel;
-vector<variavel> tabelaVariaveis;
+vector < vector <variavel> > pilhaContextoVariavel;
+
 int tempGenQtt = 0;
 int nomeGenQtt = 0;
 
+//Verifica se já existe uma variável com esse nome
 bool existeNome(string nome);
+
+//Empilha um contexto
+void empilhaContexto()
+{
+	vector <variavel> tabelaVariaveis;
+
+	pilhaContextoVariavel.push_back(tabelaVariaveis);
+
+}
+
+void desempilhaContexto()
+{
+	pilhaContextoVariavel.pop_back();
+}
 
 string genTemp()
 {
@@ -56,12 +71,19 @@ void insereVariavel(string nome, string tipo, string identificacao)
 	novaVariavel.tipo = tipo;
 	novaVariavel.identificacao = identificacao;
 
-	tabelaVariaveis.push_back(novaVariavel);
+
+	
+	//Adiciona variável no último contexto
+	pilhaContextoVariavel.back().push_back(novaVariavel);
+
+
 }
 
 //Verifica se existe um nome na tabela de variáveis
 bool existeNome(string nome)
 {
+
+	vector <variavel> tabelaVariaveis = pilhaContextoVariavel.back();
 
 	if (tabelaVariaveis.size() == 0)
 			return false;
@@ -84,37 +106,49 @@ bool existeNome(string nome)
 void buscaVariavel(string nome, variavel &var)
 {
 
-	if (tabelaVariaveis.size() == 0)
+	//Percorre os contextos do fim ao início
+	for(std::vector< vector <variavel> >::reverse_iterator it = pilhaContextoVariavel.rbegin(); it != pilhaContextoVariavel.rend(); it++)    
 	{
-		//Sinaliza erro
-		cout << "\tErro: " + nome + " não declarado\n";
-		exit(1);	
-	}
+
+		//Aponta para um contexto
+		vector <variavel> tabelaVariaveis = *it;
+
+		//Se não tem variável declarada
+		if (tabelaVariaveis.size() == 0)
+			continue;
 	
-
-	for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
-	{
-
-		variavel temp = *it;
-
-		if (!temp.nome.compare(nome))
+		//Percorre dentro de um contexto
+		for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
 		{
-			var = temp;
-			return;
-		}
+
+			//Aponta pra uma variável
+			variavel temp = *it;
+
+			//Se achou o nome
+			if (!temp.nome.compare(nome))
+			{
+				var = temp;
+				return;
+			}
     
+		}
+
 	}
 
-		
 	//Sinaliza erro
 	cout << "\tErro: " + nome + " não declarado\n";
 	exit(1);	
 	
 }
 
-//Lista as declarações das variáveis
+//Lista as declarações das variáveis do contexto atual
 void listaDeclaracoes()
 {
+
+	//Pega o contexto atual
+	vector <variavel> tabelaVariaveis = pilhaContextoVariavel.back();
+
+	//Percorre o contexto
 	for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
 	{
 
@@ -124,6 +158,7 @@ void listaDeclaracoes()
     
 	}
 
+	return;
 
 }
 
@@ -332,6 +367,18 @@ COMANDO 	: DECLARACAO
 				$$.traducao =  $1.traducao;
 			}
 			;
+/*			| X FOR(E) 
+			{
+
+			}
+			| X BLOCO
+			;
+
+X 			:
+			{
+				empilha contexto();
+			}
+			;*/
 
 TIPO 	    : TK_TIPO_INT 
 			{
@@ -570,6 +617,8 @@ int yyparse();
 
 int main( int argc, char* argv[] )
 {
+
+	empilhaContexto();
 	yyparse();
 
 	return 0;
