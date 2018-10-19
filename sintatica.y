@@ -25,6 +25,7 @@ struct atributos
 };
 
 vector < vector <variavel> > pilhaContextoVariavel;
+string declaracoes;
 
 int tempGenQtt = 0;
 int nomeGenQtt = 0;
@@ -43,6 +44,20 @@ void empilhaContexto()
 
 void desempilhaContexto()
 {
+	//Guarda as variáveis declaradas
+	vector <variavel> tabelaVariaveis = pilhaContextoVariavel.back();
+
+	//Percorre dentro de um contexto do mais recente ao mais antigo
+	for(std::vector<variavel>::reverse_iterator it = tabelaVariaveis.rbegin(); it != tabelaVariaveis.rend(); it++)    
+	{
+
+		//Aponta pra uma variável
+		variavel temp = *it;
+
+		declaracoes = "\t" + temp.tipo + " " + temp.identificacao + ";\n" + declaracoes ;
+    
+	}
+
 	pilhaContextoVariavel.pop_back();
 }
 
@@ -142,25 +157,36 @@ void buscaVariavel(string nome, variavel &var)
 }
 
 //Lista as declarações das variáveis do contexto atual
-void listaDeclaracoes()
+/*void listaDeclaracoes()
 {
 
-	//Pega o contexto atual
-	vector <variavel> tabelaVariaveis = pilhaContextoVariavel.back();
-
-	//Percorre o contexto
-	for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
+	//Percorre os contextos do fim ao início
+	for(std::vector< vector <variavel> >::reverse_iterator it = pilhaContextoVariavel.rbegin(); it != pilhaContextoVariavel.rend(); it++)    
 	{
 
-		variavel temp = *it;
+		//Aponta para um contexto
+		vector <variavel> tabelaVariaveis = *it;
 
-		cout << "\t" + temp.tipo + " " + temp.identificacao + ";\n"; 
+		//Se não tem variável declarada
+		if (tabelaVariaveis.size() == 0)
+			continue;
+	
+		//Percorre dentro de um contexto
+		for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
+		{
+
+			//Aponta pra uma variável
+			variavel temp = *it;
+
+			cout << "\t" + temp.tipo + " " + temp.identificacao + ";\n"; 
     
+		}
+
 	}
 
 	return;
 
-}
+}*/
 
 //Atualiza os valores de uma expressão aritmética
 void atualizaRegraExprAritimetica(atributos &E1, atributos &E2)
@@ -251,27 +277,46 @@ string genNomeGen();
 
 %%
 
-S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+S 			: COMANDOS
 			{
-				cout << "int main (void)\n{\n";
+				desempilhaContexto();
 
-				listaDeclaracoes();
-
-				cout << "\n" + $5.traducao + "}\n";
+				cout << "\n" + declaracoes + "\n" +  $1.traducao;
+				
 			}
 			;
 
-BLOCO		: '{' COMANDOS '}'
+BLOCO		: EMPCONTEXTO '{' COMANDOS '}' DESCONTEXTO
 			{
-				$$.traducao = $2.traducao;
+				$$.traducao = $3.traducao;
 
 			}
+			;
+
+DESCONTEXTO :	
+			{
+				desempilhaContexto();
+			}
+			;
+
+EMPCONTEXTO : 
+			{
+				empilhaContexto();
+			}	
 			;
 
 COMANDOS	: COMANDO COMANDOS
 			{
 				$$.traducao = $1.traducao + $2.traducao;
 				
+			}
+			| BLOCO
+			{
+				$$.traducao = $1.traducao;
+			}
+			| TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+			{
+				$$.traducao = "\nint main (void)\n{\n" + $5.traducao + "}\n";
 			}
 			|
 			{
@@ -619,6 +664,7 @@ int main( int argc, char* argv[] )
 {
 
 	empilhaContexto();
+
 	yyparse();
 
 	return 0;
