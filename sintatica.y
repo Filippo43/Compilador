@@ -277,12 +277,18 @@ string genNomeGen();
 
 %%
 
-S 			: COMANDOS
+S 			: CMDSGLOBAL
 			{
 				desempilhaContexto();
 
 				cout << "\n" + declaracoes + "\n" +  $1.traducao;
 				
+			}
+			;
+
+FUNCAO 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+			{
+				$$.traducao = "\nint main (void)\n{\n" + $5.traducao + "}\n";
 			}
 			;
 
@@ -304,6 +310,19 @@ EMPCONTEXTO :
 				empilhaContexto();
 			}	
 			;
+CMDSGLOBAL	: COMANDO CMDSGLOBAL
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			| FUNCAO
+			{
+				$$.traducao = $1.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
 
 COMANDOS	: COMANDO COMANDOS
 			{
@@ -313,10 +332,6 @@ COMANDOS	: COMANDO COMANDOS
 			| BLOCO
 			{
 				$$.traducao = $1.traducao;
-			}
-			| TK_TIPO_INT TK_MAIN '(' ')' BLOCO
-			{
-				$$.traducao = "\nint main (void)\n{\n" + $5.traducao + "}\n";
 			}
 			|
 			{

@@ -1,17 +1,14 @@
-int i;
+int a = 3;
 
-int a = 5;
+int x = 2 + 4 * 3;
 
 int main()
 {
 	
-	i = 2;
+	real i = 2;
 
 	real a = i + 2;
 
-	{
-		i = 3;
-	}
 
 
 }
