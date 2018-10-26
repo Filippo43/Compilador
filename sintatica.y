@@ -265,7 +265,7 @@ string genTemp();
 string genNomeGen();
 %}
 
-%token TK_NUM TK_REAL TK_BOOL TK_CHAR
+%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
 %token TK_FIM TK_ERROR 
 
@@ -283,6 +283,34 @@ S 			: CMDSGLOBAL
 
 				cout << "\n" + declaracoes + "\n" +  $1.traducao;
 				
+			}
+			;
+
+LACO		: TK_WHILE '(' EL ')' BLOCO
+			{
+
+				//Criação de variável temporária
+				string nometemp = genTemp();
+
+				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), "bool", nometemp);
+
+				nomeGenQtt ++;
+
+				string labelInicio = "inicioWhile" + to_string(nomeGenQtt);
+				string labelFim = "fimWhile" + to_string(nomeGenQtt);
+
+
+				$$.traducao = "\n\t" + labelInicio + ":\n" + 
+					$3.traducao +
+					"\t" + nometemp + " = !" + $3.label + ";\n" +
+					"\tif " + nometemp + " go to " + labelFim + ":\n" +
+					$5.traducao +
+					"\tgo to " + labelInicio + ":\n" + 
+					"\t" + labelFim + ":\n\n";
+
+
 			}
 			;
 
@@ -330,6 +358,10 @@ COMANDOS	: COMANDO COMANDOS
 				
 			}
 			| BLOCO
+			{
+				$$.traducao = $1.traducao;
+			}
+			| LACO
 			{
 				$$.traducao = $1.traducao;
 			}

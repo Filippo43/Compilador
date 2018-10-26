@@ -30,6 +30,8 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "bool"		{return TK_TIPO_BOOL;}
 
+"while"		{return TK_WHILE;}
+
 "char"		{return TK_TIPO_CHAR;}
 
 "real"		{return TK_TIPO_REAL;}
