@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <map>
 #include <vector>
 #include <stack>
@@ -25,6 +27,7 @@ struct atributos
 };
 
 vector < vector <variavel> > pilhaContextoVariavel;
+stack <string> labelStackEnd;
 string declaracoes;
 
 int tempGenQtt = 0;
@@ -41,6 +44,27 @@ void empilhaContexto()
 	pilhaContextoVariavel.push_back(tabelaVariaveis);
 
 }
+
+string gerarLabelEndif(void)
+{
+	char buffer[64];
+	static unsigned i;
+
+	sprintf(buffer,"endif%i", i++);
+
+	return buffer;
+}
+
+string gerarLabel(int base)
+{
+	char buffer[64];
+	static unsigned i;
+
+	sprintf(buffer,"L%i", base+i++);
+
+	return buffer;
+}
+
 
 void desempilhaContexto()
 {
@@ -268,6 +292,7 @@ string genNomeGen();
 %token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
 %token TK_FIM TK_ERROR 
+%token TK_IF TK_ELSE
 
 %start S
 
@@ -457,6 +482,10 @@ COMANDO 	: DECLARACAO
 			{
 				//Transfere para tradução de comando a tradução de ATRIBUICAO
 				$$.traducao =  $1.traducao;
+			}
+			| CONDICIONAL
+			{
+				$$.traducao = $1.traducao;
 			}
 			;
 /*			| X FOR(E) 
@@ -698,6 +727,54 @@ ID		: TK_ID
 			{
 				//Passa seu nome literal para ID
 				$$.label = $1.label;
+			}
+			;
+CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
+			{
+				string nometemp = genTemp();
+				insereVariavel(genNomeGen(), "bool", nometemp);
+				string label = labelStackEnd.top();
+				labelStackEnd.pop();
+
+				$$.traducao = $3.traducao + "\t" + nometemp + "= !" + 
+				$3.label + ";\n" + "\tif" + "(" + nometemp + ")" + "\n\tgoto " + label + ";\n" + 
+				$5.traducao + "\tgoto " + $6.tipo + ";\n" + $6.traducao +"\t"+ $6.tipo + ":\n";
+			}
+			;
+			
+CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
+			{
+
+				string nometemp = genTemp();
+				string labelInit = gerarLabel(0);
+				string labelEnd = labelStackEnd.top();
+				labelStackEnd.pop();		
+
+				insereVariavel(genNomeGen(), "bool", nometemp);
+
+				$$.traducao = "\t" + labelInit + ":\n"+ $4.traducao + "\t" + nometemp + "= !" + 
+				$4.label + ";\n\tif" + "(" + nometemp + ")" + "\n\tgoto " + labelEnd + ";\n" + 
+				$6.traducao + "\tgoto " + $7.tipo + ";\n" + $7.traducao ;
+				$$.tipo = $7.tipo;
+
+				labelEnd = gerarLabel(-1);
+				labelStackEnd.push(labelEnd);
+			}
+			| TK_ELSE BLOCO
+			{
+				string label = gerarLabelEndif();
+				string labelelse = gerarLabel(0);
+				labelStackEnd.push(label);
+				labelStackEnd.push(labelelse);
+				$$.tipo = label;
+				$$.traducao = "\t" + labelelse + ":\n" + $2.traducao;
+
+			}
+			|
+			{
+				string label = gerarLabelEndif();
+				labelStackEnd.push(label);
+				$$.tipo = label;
 			}
 			;
 

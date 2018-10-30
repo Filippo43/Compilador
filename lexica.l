@@ -31,6 +31,8 @@ ID {LETRA}({LETRA}|{NUM})*
 "bool"		{return TK_TIPO_BOOL;}
 
 "while"		{return TK_WHILE;}
+"if" { return TK_IF; }
+"else" {return TK_ELSE;}
 
 "char"		{return TK_TIPO_CHAR;}
 
