@@ -28,6 +28,8 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "int"		{return TK_TIPO_INT;}
 
+"for"		{return TK_FOR;}
+
 "bool"		{return TK_TIPO_BOOL;}
 
 "while"		{return TK_WHILE;}

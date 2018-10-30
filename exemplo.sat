@@ -1,19 +1,13 @@
-int a = 3;
 
-int x = 2 + 4 * 3;
 
 int main()
 {
-	
-	real i = 2;
 
-	real a = i + 2;
-
-	while (i == 2)
-	{
-		i = i + 1;
+int i = 10;
+	for(i = 5; i <= 10; i = i + 1){
+		int x = 10;
+		x = 20;
 	}
-
 
 
 }

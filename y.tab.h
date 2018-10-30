@@ -50,16 +50,17 @@ extern int yydebug;
     TK_BOOL = 260,
     TK_CHAR = 261,
     TK_WHILE = 262,
-    TK_MAIN = 263,
-    TK_ID = 264,
-    TK_TIPO_INT = 265,
-    TK_TIPO_REAL = 266,
-    TK_TIPO_BOOL = 267,
-    TK_TIPO_CHAR = 268,
-    TK_FIM = 269,
-    TK_ERROR = 270,
-    TK_IF = 271,
-    TK_ELSE = 272
+    TK_FOR = 263,
+    TK_MAIN = 264,
+    TK_ID = 265,
+    TK_TIPO_INT = 266,
+    TK_TIPO_REAL = 267,
+    TK_TIPO_BOOL = 268,
+    TK_TIPO_CHAR = 269,
+    TK_FIM = 270,
+    TK_ERROR = 271,
+    TK_IF = 272,
+    TK_ELSE = 273
   };
 #endif
 /* Tokens.  */
@@ -68,16 +69,17 @@ extern int yydebug;
 #define TK_BOOL 260
 #define TK_CHAR 261
 #define TK_WHILE 262
-#define TK_MAIN 263
-#define TK_ID 264
-#define TK_TIPO_INT 265
-#define TK_TIPO_REAL 266
-#define TK_TIPO_BOOL 267
-#define TK_TIPO_CHAR 268
-#define TK_FIM 269
-#define TK_ERROR 270
-#define TK_IF 271
-#define TK_ELSE 272
+#define TK_FOR 263
+#define TK_MAIN 264
+#define TK_ID 265
+#define TK_TIPO_INT 266
+#define TK_TIPO_REAL 267
+#define TK_TIPO_BOOL 268
+#define TK_TIPO_CHAR 269
+#define TK_FIM 270
+#define TK_ERROR 271
+#define TK_IF 272
+#define TK_ELSE 273
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

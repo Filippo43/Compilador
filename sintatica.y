@@ -289,9 +289,9 @@ string genTemp();
 string genNomeGen();
 %}
 
-%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE
+%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
-%token TK_FIM TK_ERROR 
+%token TK_FIM TK_ERROR  
 %token TK_IF TK_ELSE
 
 %start S
@@ -337,6 +337,14 @@ LACO		: TK_WHILE '(' EL ')' BLOCO
 
 
 			}
+			| TK_FOR '('E '=' E ';' EL ';' E OPATRIB ')' BLOCO
+			{
+string nometemp = genTemp();
+				$$.traducao =   "\t" + $3.label + " = " + $5.label + "\n\tInicioFor:\n" +  $7.traducao + "\t" + nometemp + " != " + $7.label + "\n" + "\tif(" + nometemp + 
+				") goto FimFor\n" + $12.traducao  + $10.traducao  + "\t" + $3.label + " = " + $10.label + "\n\tgoto InicioFor\n" + "\tFimFor:" "\n";
+				
+			}
+
 			;
 
 FUNCAO 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
