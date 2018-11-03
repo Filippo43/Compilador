@@ -310,7 +310,6 @@ S 			: CMDSGLOBAL
 				
 			}
 			;
-
 LACO		: TK_WHILE '(' EL ')' BLOCO
 			{
 
@@ -339,12 +338,11 @@ LACO		: TK_WHILE '(' EL ')' BLOCO
 			}
 			| TK_FOR '('E '=' E ';' EL ';' E OPATRIB ')' BLOCO
 			{
-string nometemp = genTemp();
+				string nometemp = genTemp();
 				$$.traducao =   "\t" + $3.label + " = " + $5.label + "\n\tInicioFor:\n" +  $7.traducao + "\t" + nometemp + " != " + $7.label + "\n" + "\tif(" + nometemp + 
 				") goto FimFor\n" + $12.traducao  + $10.traducao  + "\t" + $3.label + " = " + $10.label + "\n\tgoto InicioFor\n" + "\tFimFor:" "\n";
 				
 			}
-
 			;
 
 FUNCAO 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
@@ -391,10 +389,6 @@ COMANDOS	: COMANDO COMANDOS
 				
 			}
 			| BLOCO
-			{
-				$$.traducao = $1.traducao;
-			}
-			| LACO
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -495,19 +489,11 @@ COMANDO 	: DECLARACAO
 			{
 				$$.traducao = $1.traducao;
 			}
-			;
-/*			| X FOR(E) 
+			| LACO
 			{
-
+				$$.traducao = $1.traducao;
 			}
-			| X BLOCO
 			;
-
-X 			:
-			{
-				empilha contexto();
-			}
-			;*/
 
 TIPO 	    : TK_TIPO_INT 
 			{
