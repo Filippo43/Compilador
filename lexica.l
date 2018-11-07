@@ -9,15 +9,15 @@ LETRA [A-Za-z_]
 BOOLEANA (true|false)
 STR \"(\\.|[^"\\])*\"
 
-
 ATRIB {=}
 DELIM {ESPACO}+
 NUM {DIGITO}+
 BOOL {BOOLEANA}
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
-ID {LETRA}({LETRA}|{NUM})*
 STRING {STR}
+ID {LETRA}({LETRA}|{NUM})*
+
 
 
 
@@ -27,6 +27,10 @@ STRING {STR}
 
 {DELIM} 	{}
 
+"break"		{return TK_BREAK;}
+
+"continue"	{return TK_CONTINUE;}
+
 "main"		{return TK_MAIN;}
 
 "int"		{return TK_TIPO_INT;}
@@ -35,21 +39,25 @@ STRING {STR}
 
 "bool"		{return TK_TIPO_BOOL;}
 
+"input" 	{return TK_INPUT;}
+
+"output"	{return TK_OUTPUT;}
+
+"do"		{return TK_DO;}
+
 "while"		{return TK_WHILE;}
 
-"if" 		{ return TK_IF; }
-
-"input"		{ return TK_INPUT;}
-
-"output"	{ return TK_OUTPUT;}
+"if" 		{return TK_IF; }
 
 "else" 		{return TK_ELSE;}
+
+"string"	{return TK_TIPO_STRING;}
 
 "char"		{return TK_TIPO_CHAR;}
 
 "real"		{return TK_TIPO_REAL;}
 
-[(){}[\];,=<>!\"]	{ return *yytext; }
+[(){}[\];,=<>!]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
@@ -59,9 +67,9 @@ STRING {STR}
 {REAL}		{ yylval.label = yytext; return TK_REAL; }
 {BOOL}		{ yylval.label = yytext; return TK_BOOL; }
 {ID}		{ yylval.label = yytext; return TK_ID; }
-{STRING}	{ yylval.label = yytext; return TK_STRING; }
+{STRING}	{ yylval.label = yytext; return TK_STRING;}
 
 
-.			{ return *yytext;}
+.			{ *yytext; }
 
 %%

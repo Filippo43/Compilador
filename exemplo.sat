@@ -1,11 +1,16 @@
+
 int main()
 {
+string a = "Vinicius boladao";
 
-	int i = 10;
+ 
+ 
 
-	input (i);
-	
-	output ("Este é um Exemplo de OutPut!");
-	output (i);
-	output ("\n");
-}
+ input(a);
+
+ output("Isto é uma saída!\n");
+
+
+
+
+}	

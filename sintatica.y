@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <stack>
+#include <queue> 
 
 #define YYSTYPE atributos
 
@@ -26,12 +27,21 @@ struct atributos
 	string tipo;
 };
 
-vector < vector <variavel> > pilhaContextoVariavel;
+struct laco
+{
+	string labelinicio;
+	string labelfim;
+};
+
+vector < vector < variavel> > pilhaContextoVariavel;
+vector < laco > pilhaLaco;
 stack <string> labelStackEnd;
+
 string declaracoes;
 
 int tempGenQtt = 0;
 int nomeGenQtt = 0;
+int lacoQtt = 0;
 
 //Verifica se já existe uma variável com esse nome
 bool existeNome(string nome);
@@ -180,37 +190,6 @@ void buscaVariavel(string nome, variavel &var)
 	
 }
 
-//Lista as declarações das variáveis do contexto atual
-/*void listaDeclaracoes()
-{
-
-	//Percorre os contextos do fim ao início
-	for(std::vector< vector <variavel> >::reverse_iterator it = pilhaContextoVariavel.rbegin(); it != pilhaContextoVariavel.rend(); it++)    
-	{
-
-		//Aponta para um contexto
-		vector <variavel> tabelaVariaveis = *it;
-
-		//Se não tem variável declarada
-		if (tabelaVariaveis.size() == 0)
-			continue;
-	
-		//Percorre dentro de um contexto
-		for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
-		{
-
-			//Aponta pra uma variável
-			variavel temp = *it;
-
-			cout << "\t" + temp.tipo + " " + temp.identificacao + ";\n"; 
-    
-		}
-
-	}
-
-	return;
-
-}*/
 
 //Atualiza os valores de uma expressão aritmética
 void atualizaRegraExprAritimetica(atributos &E1, atributos &E2)
@@ -278,6 +257,12 @@ void verificaAtribuicao (string tipo1, string tipo2)
 		if(!tipo2.compare("bool"))
 			return;		
 	}
+	else if (!tipo1.compare("char*"))
+	{
+		if(!tipo2.compare("char*"))
+			return;		
+	}
+
 
 	cout << "\tErro: não pôde converter de " + tipo2 + " para " + tipo1 + "\n";
 	exit(1);
@@ -289,10 +274,10 @@ string genTemp();
 string genNomeGen();
 %}
 
-%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR
-%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
-%token TK_FIM TK_ERROR TK_INPUT
-%token TK_IF TK_ELSE TK_OUTPUT TK_STRING
+%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE
+%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
+%token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT
+%token TK_IF TK_ELSE
 
 %start S
 
@@ -310,38 +295,110 @@ S 			: CMDSGLOBAL
 				
 			}
 			;
-LACO		: TK_WHILE '(' EL ')' BLOCO
+
+//Regra para emiplhar um contexto específico de laço
+EMPLACO 	:
 			{
+
+				string inicioLabel = "inicioLaco" + to_string(lacoQtt);
+				string fimLabel = "fimLaco" + to_string(lacoQtt);
+
+				//Insere na pilha
+				laco novoLaco;
+				novoLaco.labelinicio = inicioLabel;
+				novoLaco.labelfim = fimLabel;
+				pilhaLaco.push_back(novoLaco);
+
+				lacoQtt++;
+
+			}
+			;
+
+LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
+			{
+				//Pega as labels na pilha do Laço atual
+				laco lacoAtual = pilhaLaco.back();
 
 				//Criação de variável temporária
 				string nometemp = genTemp();
 
-				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
 				//Adiciona na tabela
 				insereVariavel(genNomeGen(), "bool", nometemp);
-
-				nomeGenQtt ++;
-
-				string labelInicio = "inicioWhile" + to_string(nomeGenQtt);
-				string labelFim = "fimWhile" + to_string(nomeGenQtt);
-
-
-				$$.traducao = "\n\t" + labelInicio + ":\n" + 
+				
+				$$.traducao = "\n\t" + lacoAtual.labelinicio + ":\n" + 
 					$3.traducao +
 					"\t" + nometemp + " = !" + $3.label + ";\n" +
-					"\tif " + nometemp + " go to " + labelFim + ":\n" +
-					$5.traducao +
-					"\tgo to " + labelInicio + ":\n" + 
-					"\t" + labelFim + ":\n\n";
+					"\tif " + nometemp + " go to " + lacoAtual.labelfim + ":\n" +
+					$6.traducao +
+					"\tgo to " + lacoAtual.labelinicio + ":\n" + 
+					"\t" + lacoAtual.labelfim + ":\n\n";
 
+				//Desempilha laço
+				pilhaLaco.pop_back();
 
 			}
-			| TK_FOR '('E '=' E ';' EL ';' E OPATRIB ')' BLOCO
+			| TK_FOR '('E '=' E ';' EL ';' E OPATRIB ')' EMPLACO BLOCO
 			{
+
+				//Pega as labels na pilha do Laço atual
+				laco lacoAtual = pilhaLaco.back();
+
+				//Criação de variável temporária
 				string nometemp = genTemp();
-				$$.traducao =   "\t" + $3.label + " = " + $5.label + "\n\tInicioFor:\n" +  $7.traducao + "\t" + nometemp + " != " + $7.label + "\n" + "\tif(" + nometemp + 
-				") goto FimFor\n" + $12.traducao  + $10.traducao  + "\t" + $3.label + " = " + $10.label + "\n\tgoto InicioFor\n" + "\tFimFor:" "\n";
-				
+
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), "bool", nometemp);		
+
+				$$.traducao =   "\t" + $3.label + " = " + $5.label + "\n\t" + lacoAtual.labelinicio +  "\n" +  $7.traducao + "\t" + nometemp + " != " + $7.label + "\n" + "\tif(" + nometemp + 
+				") goto" + lacoAtual.labelfim + "\n" + $13.traducao  + $10.traducao  + "\t" + $3.label + " = " + $10.label + "\n\tgoto" +  lacoAtual.labelinicio +  "\n" + "\t" + lacoAtual.labelfim + ":" "\n";
+
+				//Desempilha laço
+				pilhaLaco.pop_back();
+			}
+			| TK_DO EMPLACO BLOCO TK_WHILE '(' EL ')'';'{
+
+				//Pega as labels na pilha do Laço atual
+				laco lacoAtual = pilhaLaco.back();
+
+				$$.traducao = "\t" + lacoAtual.labelinicio + "\n"+ $3.traducao + "\tif(" + $6.label + ") goto " + lacoAtual.labelinicio + "\n\t" + lacoAtual.labelfim + "\n";
+
+				//Desempilha laço
+				pilhaLaco.pop_back();
+
+			}
+			;
+
+INTLACO 	: TK_BREAK ';'
+			{
+				//Verifica se há um contexto de laço em questão
+				if (pilhaLaco.size() == 0)
+				{
+					cout << "\tbreak fora de um laço!\n";
+					exit(3);
+				}
+
+				//Pega as labels na pilha do Laço atual
+				laco lacoAtual = pilhaLaco.back();
+
+				//Realiza o desvio do laço em questão
+				$$.traducao = "\tgo to " + lacoAtual.labelfim + ";\n";
+
+			}
+			| TK_CONTINUE ';'
+			{
+				//Verifica se há um contexto de laço em questão
+				if (pilhaLaco.size() == 0)
+				{
+					cout << "\tcontinue fora de um laço!\n";
+					exit(3);
+				}
+
+				//Pega as labels na pilha do Laço atual
+				laco lacoAtual = pilhaLaco.back();
+
+				//Realiza o desvio do laço em questão
+				$$.traducao = "\tgo to " + lacoAtual.labelinicio + ";\n";
+
 			}
 			;
 
@@ -360,12 +417,15 @@ BLOCO		: EMPCONTEXTO '{' COMANDOS '}' DESCONTEXTO
 
 DESCONTEXTO :	
 			{
+
 				desempilhaContexto();
 			}
 			;
 
 EMPCONTEXTO : 
 			{
+
+				
 				empilhaContexto();
 			}	
 			;
@@ -397,24 +457,29 @@ COMANDOS	: COMANDO COMANDOS
 				$$.traducao = "";
 			}
 			;
+
+			
 //Atribuições do lado direito
 OPATRIB		: '=' TK_CHAR
 			{
+
 				$$.label = $2.label;
 				$$.tipo = "char";
 			}
 			| '=' TK_BOOL
 			{
+
 				$$.label = $2.label;
 				$$.tipo = "bool";
 			}
 			| '=' E 
 			{
-
+				
 				$$.label = $2.label;
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
 			}
+			
 			| '=' EL
 			{
 				
@@ -422,20 +487,49 @@ OPATRIB		: '=' TK_CHAR
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
 			}
+			| '=' ES
+			{
+				$$.label = $2.label;
+				$$.traducao = $2.traducao;
+				$$.tipo = $2.tipo;
+			}
 			|
 			{
+			
 				$$.tipo = "null";
 			}
 			;
+
+//Expressões com Strings
+ES     		: TK_STRING
+			{
+
+				//Cria e insere variáveis
+				string nomeTemp1 = genTemp();
+				insereVariavel(genNomeGen(), "char*" , nomeTemp1);
+
+				string nomeTemp2 = nomeTemp1 + "_s";
+				insereVariavel(genNomeGen(), "int" , nomeTemp2);
+
+				$$.traducao = "\t" + nomeTemp2 + " = (" + $1.label + ").lenght() + 1;\n"
+				+ "\t" + nomeTemp1 + " = (char*) malloc (sizeof(char) * " + nomeTemp2 + ");\n"
+				+ "\t" + "strcpy(" + nomeTemp1 + ", " + $1.label + ");\n";
+
+				$$.tipo = "char*";
+
+				$$.label = nomeTemp1;
+			}
+			;
+
 //Atribuições
 ATRIBUICAO 	: ID OPATRIB ';'
 			{
-
+				
 				//Variavel ID
 				variavel var;
-
+				
 				buscaVariavel($1.label, var);
-
+				
 				//Compara atribuição 
 				verificaAtribuicao(var.tipo, $2.tipo);
 				
@@ -447,16 +541,17 @@ ATRIBUICAO 	: ID OPATRIB ';'
 					else
 						$$.traducao = $2.traducao + "\t" + var.identificacao + " = " + $2.label + ";\n";
 				}
-					
 			}
-			;
+
+			
 //Declarações
 DECLARACAO	: TIPO ID OPATRIB ';'
 			{
 
 				//Criação de variável temporária
 				string nomeTemp = genTemp();
-
+				
+				
 				//Tenta inserir variável
 				insereVariavel($2.label, $1.tipo , nomeTemp);
 
@@ -490,6 +585,10 @@ COMANDO 	: DECLARACAO
 				$$.traducao = $1.traducao;
 			}
 			| LACO
+			{
+				$$.traducao = $1.traducao;
+			}
+			| INTLACO
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -539,6 +638,7 @@ OUTTERM		:  TK_STRING
 TIPO 	    : TK_TIPO_INT 
 			{
 				$$.tipo = "int";
+
 			}
 			| TK_TIPO_REAL
 			{
@@ -552,7 +652,13 @@ TIPO 	    : TK_TIPO_INT
 			{
 				$$.tipo = "char";
 			}
+			|  TK_TIPO_STRING
+			{
+				$$.tipo = "char*";
+
+			}
 			;
+
 //Expresões Lógicas
 EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 			{
@@ -723,12 +829,15 @@ E 			: E '/' E
 				$$.tipo = "real";
 				$$.label = $1.label;
 			}
+			
 			//Uso de IDs do lado direito da expressão
 			| TK_ID
 			{
+
 				//Busca na tabela
 				variavel var;
 				
+
 				//Tenta buscar a variável
 				buscaVariavel($1.label, var);
 
@@ -736,7 +845,7 @@ E 			: E '/' E
 				$$.tipo = var.tipo;
 				$$.label = var.identificacao; 
 			}
-			/*| '(' TIPO ')' TK_ID
+			| '(' TIPO ')' TK_ID
 			{
 				//Busca na tabela
 				variavel var;
@@ -756,16 +865,18 @@ E 			: E '/' E
 				//Passa o tipo e o nome para E
 				$$.tipo = $2.tipo;
 				$$.label = nometemp; 
-			}*/
+			}
 			;
 ID		: TK_ID
 			{
 				//Passa seu nome literal para ID
+
 				$$.label = $1.label;
 			}
 			;
 CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 			{
+				
 				string nometemp = genTemp();
 				insereVariavel(genNomeGen(), "bool", nometemp);
 				string label = labelStackEnd.top();
@@ -779,7 +890,7 @@ CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 			
 CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 			{
-
+				
 				string nometemp = genTemp();
 				string labelInit = gerarLabel(0);
 				string labelEnd = labelStackEnd.top();
@@ -796,7 +907,9 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				labelStackEnd.push(labelEnd);
 			}
 			| TK_ELSE BLOCO
+
 			{
+				
 				string label = gerarLabelEndif();
 				string labelelse = gerarLabel(0);
 				labelStackEnd.push(label);
