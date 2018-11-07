@@ -59,8 +59,11 @@ extern int yydebug;
     TK_TIPO_CHAR = 269,
     TK_FIM = 270,
     TK_ERROR = 271,
-    TK_IF = 272,
-    TK_ELSE = 273
+    TK_INPUT = 272,
+    TK_IF = 273,
+    TK_ELSE = 274,
+    TK_OUTPUT = 275,
+    TK_STRING = 276
   };
 #endif
 /* Tokens.  */
@@ -78,8 +81,11 @@ extern int yydebug;
 #define TK_TIPO_CHAR 269
 #define TK_FIM 270
 #define TK_ERROR 271
-#define TK_IF 272
-#define TK_ELSE 273
+#define TK_INPUT 272
+#define TK_IF 273
+#define TK_ELSE 274
+#define TK_OUTPUT 275
+#define TK_STRING 276
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

@@ -291,8 +291,8 @@ string genNomeGen();
 
 %token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR
-%token TK_FIM TK_ERROR  
-%token TK_IF TK_ELSE
+%token TK_FIM TK_ERROR TK_INPUT
+%token TK_IF TK_ELSE TK_OUTPUT TK_STRING
 
 %start S
 
@@ -492,6 +492,47 @@ COMANDO 	: DECLARACAO
 			| LACO
 			{
 				$$.traducao = $1.traducao;
+			}
+			| INPUT
+			{
+				$$.traducao = $1.traducao;
+			}
+			| OUTPUT
+			{
+				$$.traducao = $1.traducao;
+			}
+			;
+
+INPUT 		: TK_INPUT '(' ID ')' ';'
+			{
+				//Busca na tabela
+				variavel var;
+
+				//Tenta buscar a variável
+				buscaVariavel($3.label, var);
+
+				$$.traducao = "\tcin >> " + var.identificacao + ";\n";
+			}
+			;
+
+OUTPUT		: TK_OUTPUT '(' OUTTERM ')' ';'
+			{
+				$$.traducao = "\tcout >> " + $3.traducao + ";\n";	
+			}
+
+OUTTERM		:  TK_STRING
+			{
+				$$.traducao =  $1.label;
+			}
+			| ID
+			{
+				//Busca na tabela
+				variavel var;
+
+				//Tenta buscar a variável
+				buscaVariavel($1.label, var);
+
+				$$.traducao = var.identificacao;
 			}
 			;
 

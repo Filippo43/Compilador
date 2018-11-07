@@ -3,24 +3,9 @@ int main()
 
 	int i = 10;
 
-	while (i < 10)
-	{
-		i = i + 1;
-	}
-
+	input (i);
 	
-	if (i == 11)
-	{
-		i = 10;
-	}
-	else if (i == 10)
-	{
-		i = 0;
-	}
-
-	
-	while (i < 10)
-	{
-		i = i + 1;
-	}
+	output ("Este é um Exemplo de OutPut!");
+	output (i);
+	output ("\n");
 }
