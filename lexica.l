@@ -17,6 +17,7 @@ REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 STRING {STR}
 ID {LETRA}({LETRA}|{NUM})*
+CASE (case){NUM}
 
 
 
@@ -51,6 +52,8 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "else" 		{return TK_ELSE;}
 
+"switch"	{return TK_SWITCH;}
+
 "string"	{return TK_TIPO_STRING;}
 
 "char"		{return TK_TIPO_CHAR;}
@@ -62,6 +65,7 @@ ID {LETRA}({LETRA}|{NUM})*
 [+\-*/]		{ return *yytext; }
 
 
+{CASE}		{ yylval.label = yytext; return TK_CASE; }
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {CHAR}		{ yylval.label = yytext; return TK_CHAR; }
 {REAL}		{ yylval.label = yytext; return TK_REAL; }

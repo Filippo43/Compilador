@@ -8,6 +8,7 @@
 #include <vector>
 #include <stack>
 #include <queue> 
+#include <ctype.h>
 
 #define YYSTYPE atributos
 
@@ -237,7 +238,8 @@ void verificaAtribuicao (string tipo1, string tipo2)
 
 	if (!tipo1.compare("int"))
 	{
-		if(!tipo2.compare("int"))
+		if(!tipo2.compare("int")
+			||!tipo2.compare("BOOL"))
 			return;
 	}
 	else if (!tipo1.compare("real"))
@@ -252,9 +254,10 @@ void verificaAtribuicao (string tipo1, string tipo2)
 		if(!tipo2.compare("char"))
 			return;
 	}
-	else if (!tipo1.compare("bool"))
+	else if (!tipo1.compare("BOOL"))
 	{
-		if(!tipo2.compare("bool"))
+		if(!tipo2.compare("BOOL")
+			|| !tipo2.compare("int"))
 			return;		
 	}
 	else if (!tipo1.compare("char*"))
@@ -276,7 +279,7 @@ string genNomeGen();
 
 %token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
-%token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT
+%token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE
 %token TK_IF TK_ELSE
 
 %start S
@@ -291,7 +294,8 @@ S 			: CMDSGLOBAL
 			{
 				desempilhaContexto();
 
-				cout << "\n" + declaracoes + "\n" +  $1.traducao;
+				cout << "#define TRUE 1\n#define FALSE 0\n#define BOOL int\n\n" 
+				+ declaracoes + "\n" +  $1.traducao;
 				
 			}
 			;
@@ -323,7 +327,7 @@ LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
 				string nometemp = genTemp();
 
 				//Adiciona na tabela
-				insereVariavel(genNomeGen(), "bool", nometemp);
+				insereVariavel(genNomeGen(), "BOOL", nometemp);
 				
 				$$.traducao = "\n\t" + lacoAtual.labelinicio + ":\n" + 
 					$3.traducao +
@@ -347,7 +351,7 @@ LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
 				string nometemp = genTemp();
 
 				//Adiciona na tabela
-				insereVariavel(genNomeGen(), "bool", nometemp);		
+				insereVariavel(genNomeGen(), "BOOL", nometemp);		
 
 				$$.traducao =   "\t" + $3.label + " = " + $5.label + "\n\t" + lacoAtual.labelinicio +  "\n" +  $7.traducao + "\t" + nometemp + " != " + $7.label + "\n" + "\tif(" + nometemp + 
 				") goto" + lacoAtual.labelfim + "\n" + $13.traducao  + $10.traducao  + "\t" + $3.label + " = " + $10.label + "\n\tgoto" +  lacoAtual.labelinicio +  "\n" + "\t" + lacoAtual.labelfim + ":" "\n";
@@ -402,7 +406,7 @@ INTLACO 	: TK_BREAK ';'
 			}
 			;
 
-FUNCAO 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+MAIN 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
 				$$.traducao = "\nint main (void)\n{\n" + $5.traducao + "}\n";
 			}
@@ -433,7 +437,7 @@ CMDSGLOBAL	: COMANDO CMDSGLOBAL
 			{
 				$$.traducao = $1.traducao + $2.traducao;
 			}
-			| FUNCAO
+			| MAIN
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -469,8 +473,13 @@ OPATRIB		: '=' TK_CHAR
 			| '=' TK_BOOL
 			{
 
-				$$.label = $2.label;
-				$$.tipo = "bool";
+				//$$.label = $2.label;
+			if ($2.label.compare("true"))
+				$$.label = "FALSE";
+			else
+				$$.label = "TRUE";
+
+				$$.tipo = "BOOL";
 			}
 			| '=' E 
 			{
@@ -511,7 +520,9 @@ ES     		: TK_STRING
 				string nomeTemp2 = nomeTemp1 + "_s";
 				insereVariavel(genNomeGen(), "int" , nomeTemp2);
 
-				$$.traducao = "\t" + nomeTemp2 + " = (" + $1.label + ").lenght() + 1;\n"
+				int size = $1.label.length() - 1;
+
+				$$.traducao = "\t" + nomeTemp2 + " = " + to_string(size) + ";\n"
 				+ "\t" + nomeTemp1 + " = (char*) malloc (sizeof(char) * " + nomeTemp2 + ");\n"
 				+ "\t" + "strcpy(" + nomeTemp1 + ", " + $1.label + ");\n";
 
@@ -616,12 +627,31 @@ INPUT 		: TK_INPUT '(' ID ')' ';'
 
 OUTPUT		: TK_OUTPUT '(' OUTTERM ')' ';'
 			{
-				$$.traducao = "\tcout >> " + $3.traducao + ";\n";	
+				$$.traducao = $3.traducao 
+				+ "\tcout >> " + $3.label + ";\n";	
 			}
 
 OUTTERM		:  TK_STRING
 			{
-				$$.traducao =  $1.label;
+				//Cria e insere variáveis
+				string nomeTemp1 = genTemp();
+				insereVariavel(genNomeGen(), "char*" , nomeTemp1);
+
+				string nomeTemp2 = nomeTemp1 + "_s";
+				insereVariavel(genNomeGen(), "int" , nomeTemp2);
+
+				int size = $1.label.length() - 1;
+
+				$$.traducao = "\t" + nomeTemp2 + " = " + to_string(size) + ";\n"
+				+ "\t" + nomeTemp1 + " = (char*) malloc (sizeof(char) * " + nomeTemp2 + ");\n"
+				+ "\t" + "strcpy(" + nomeTemp1 + ", " + $1.label + ");\n";
+
+				$$.tipo = "char*";
+
+				$$.label = nomeTemp1;
+
+
+				//$$.traducao =  $1.label;
 			}
 			| ID
 			{
@@ -631,7 +661,7 @@ OUTTERM		:  TK_STRING
 				//Tenta buscar a variável
 				buscaVariavel($1.label, var);
 
-				$$.traducao = var.identificacao;
+				$$.label = var.identificacao;
 			}
 			;
 
@@ -646,7 +676,7 @@ TIPO 	    : TK_TIPO_INT
 			}
 			| TK_TIPO_BOOL
 			{
-				$$.tipo = "bool";
+				$$.tipo = "BOOL";
 			}
 			| TK_TIPO_CHAR
 			{
@@ -668,10 +698,10 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 
 				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
 				//Adiciona na tabela
-				insereVariavel(genNomeGen(), "bool", nometemp);
+				insereVariavel(genNomeGen(), "BOOL", nometemp);
 
 				//Guarda o tipo da Expressão resultante em E
-				$$.tipo = "bool";
+				$$.tipo = "BOOL";
 
 				//Passa para EL a tradução
 				$$.traducao = $1.traducao + $3.traducao
@@ -680,11 +710,27 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 				//Passa para E seu valor de temporária
 				$$.label = nometemp;
 			}
+			| OPNDOLOGIC
+			{
+				$$.traducao = "";
+			}
 			;
 
 OPNDOLOGIC	: E
 			{
-				$$.traducao = $1.traducao;
+				//Criação de variável temporária
+				string nometemp = genTemp();
+
+				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+				//Adiciona na tabela
+				insereVariavel(genNomeGen(), "BOOL", nometemp);
+
+
+
+				$$.traducao = $1.traducao 
+				+ "\t" + nometemp + " = " + $1.label + " != 0;\n"
+				+ "\tif(" + nometemp + ")" 
+				+ "\n\t\t" + $1.label + " = TRUE;\n";
 				$$.tipo = $1.tipo;
 				$$.label = $1.label;
 			}
@@ -692,6 +738,16 @@ OPNDOLOGIC	: E
 			{
 				$$.tipo = "char";
 				$$.label = $1.label;
+			}
+			| TK_BOOL
+			{
+
+			if ($1.label.compare("true"))
+				$$.label = "FALSE";
+			else
+				$$.label = "TRUE";
+
+				$$.tipo = "BOOL";
 			}
 			;
 //Operadores Lógicos
@@ -770,7 +826,6 @@ E 			: E '/' E
 			}
 			| E '+' E
 			{
-
 
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
@@ -878,13 +933,56 @@ CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 			{
 				
 				string nometemp = genTemp();
-				insereVariavel(genNomeGen(), "bool", nometemp);
+				insereVariavel(genNomeGen(), "BOOL", nometemp);
 				string label = labelStackEnd.top();
 				labelStackEnd.pop();
 
 				$$.traducao = $3.traducao + "\t" + nometemp + "= !" + 
 				$3.label + ";\n" + "\tif" + "(" + nometemp + ")" + "\n\tgoto " + label + ";\n" + 
 				$5.traducao + "\tgoto " + $6.tipo + ";\n" + $6.traducao +"\t"+ $6.tipo + ":\n";
+			}
+			| TK_SWITCH '(' TRMSWITCH ')' '{' CASES '}'
+			{
+				$$.traducao = "";
+			}
+			;
+
+TRMSWITCH	: ID
+			{
+				//Busca na tabela
+				variavel var;
+				
+				//Tenta buscar a variável
+				buscaVariavel($1.label, var);
+
+				//Verifica se é do tipo inteiro
+				if (var.tipo.compare("int"))
+				{
+					cout << "Switch espera um inteiro!";
+					exit(1);
+				}
+
+				$$.label = var.identificacao; 
+			}
+			|	TK_NUM
+			{
+				$$.label = $1.label;
+			}
+			;
+
+CASES		: CASE CASES
+			{
+				$$.traducao = "";
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
+
+CASE 		: TK_CASE ':' COMANDOS 
+			{
+				$$.traducao = "";
 			}
 			;
 			
@@ -896,7 +994,7 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				string labelEnd = labelStackEnd.top();
 				labelStackEnd.pop();		
 
-				insereVariavel(genNomeGen(), "bool", nometemp);
+				insereVariavel(genNomeGen(), "BOOL", nometemp);
 
 				$$.traducao = "\t" + labelInit + ":\n"+ $4.traducao + "\t" + nometemp + "= !" + 
 				$4.label + ";\n\tif" + "(" + nometemp + ")" + "\n\tgoto " + labelEnd + ";\n" + 
