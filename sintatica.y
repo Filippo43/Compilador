@@ -9,6 +9,7 @@
 #include <stack>
 #include <queue> 
 #include <ctype.h>
+#include <regex>
 
 #define YYSTYPE atributos
 
@@ -43,6 +44,7 @@ string declaracoes;
 int tempGenQtt = 0;
 int nomeGenQtt = 0;
 int lacoQtt = 0;
+int caseQtt = 0;
 
 //Verifica se já existe uma variável com esse nome
 bool existeNome(string nome);
@@ -295,8 +297,37 @@ S 			: CMDSGLOBAL
 				desempilhaContexto();
 
 				cout << "#define TRUE 1\n#define FALSE 0\n#define BOOL int\n\n" 
-				+ declaracoes + "\n" +  $1.traducao;
+				+ declaracoes + "\n" +  $1.traducao + "\n";
+
+				//Regex para dar free em char*
+				//Toda variável temp_s tem um char* com mesmo numero de temp
+				regex rgx("int temp\\d*\\_s");
+
+				string prefixo = "int ";
+				string posfixo = "_s";
 				
+				//Percorre o Regex e acha uma temporária temp_s
+				for(sregex_iterator it(declaracoes.begin(), declaracoes.end(), rgx), it_end; it != it_end; ++it )
+        		{
+        			//Recebe a temporária
+        			string temp = (*it)[0];
+					
+					//Remove o prefixo
+					std::string::size_type i = temp.find(prefixo);
+					if (i != std::string::npos)
+   						temp.erase(i, prefixo.length());
+
+   					//Remove o posfixo
+   					i = temp.find(posfixo);
+					if (i != std::string::npos)
+   						temp.erase(i, posfixo.length());
+
+   					cout << "\tfree(" + temp + ");\n";
+        		}	
+
+        		cout << "}\n";
+
+        		//cout << (*it)[0] << "\n";
 			}
 			;
 
@@ -306,6 +337,24 @@ EMPLACO 	:
 
 				string inicioLabel = "inicioLaco" + to_string(lacoQtt);
 				string fimLabel = "fimLaco" + to_string(lacoQtt);
+
+				//Insere na pilha
+				laco novoLaco;
+				novoLaco.labelinicio = inicioLabel;
+				novoLaco.labelfim = fimLabel;
+				pilhaLaco.push_back(novoLaco);
+
+				lacoQtt++;
+
+			}
+			;
+
+//Regra para emiplhar um contexto específico de laço
+EMPCASE 	:
+			{
+
+				string inicioLabel = "inicioCase" + to_string(lacoQtt);
+				string fimLabel = "fimCase" + to_string(lacoQtt);
 
 				//Insere na pilha
 				laco novoLaco;
@@ -397,8 +446,26 @@ INTLACO 	: TK_BREAK ';'
 					exit(3);
 				}
 
-				//Pega as labels na pilha do Laço atual
-				laco lacoAtual = pilhaLaco.back();
+				laco lacoAtual;
+
+				//Enquanto o contexto atual for de case percorre todos os contextos em busca de um laço
+				for(std::vector< laco >::reverse_iterator it = pilhaLaco.rbegin(); it != pilhaLaco.rend(); it++)
+				{
+					//Pega as labels na pilha do Laço atual
+					lacoAtual = *it;
+
+					if (!(lacoAtual.labelinicio.find("case") != std::string::npos))
+						break;
+				}
+
+				//Se ele parou em um contexto de case então acusa erro
+				if (lacoAtual.labelinicio.find("case") != std::string::npos)
+				{
+
+					cout << "\tcontinue fora de um laço!\n";
+					exit(3);
+				}
+
 
 				//Realiza o desvio do laço em questão
 				$$.traducao = "\tgo to " + lacoAtual.labelinicio + ";\n";
@@ -408,7 +475,7 @@ INTLACO 	: TK_BREAK ';'
 
 MAIN 		: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				$$.traducao = "\nint main (void)\n{\n" + $5.traducao + "}\n";
+				$$.traducao = "\nint main (void)\n{\n" + $5.traducao;
 			}
 			;
 
@@ -941,51 +1008,8 @@ CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 				$3.label + ";\n" + "\tif" + "(" + nometemp + ")" + "\n\tgoto " + label + ";\n" + 
 				$5.traducao + "\tgoto " + $6.tipo + ";\n" + $6.traducao +"\t"+ $6.tipo + ":\n";
 			}
-			| TK_SWITCH '(' TRMSWITCH ')' '{' CASES '}'
-			{
-				$$.traducao = "";
-			}
 			;
 
-TRMSWITCH	: ID
-			{
-				//Busca na tabela
-				variavel var;
-				
-				//Tenta buscar a variável
-				buscaVariavel($1.label, var);
-
-				//Verifica se é do tipo inteiro
-				if (var.tipo.compare("int"))
-				{
-					cout << "Switch espera um inteiro!";
-					exit(1);
-				}
-
-				$$.label = var.identificacao; 
-			}
-			|	TK_NUM
-			{
-				$$.label = $1.label;
-			}
-			;
-
-CASES		: CASE CASES
-			{
-				$$.traducao = "";
-			}
-			|
-			{
-				$$.traducao = "";
-			}
-			;
-
-CASE 		: TK_CASE ':' COMANDOS 
-			{
-				$$.traducao = "";
-			}
-			;
-			
 CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 			{
 				

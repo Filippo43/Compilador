@@ -1,13 +1,14 @@
 int main()
 {
 
-	bool a = 2;
 
-	int x = 2 + 2;
+	string b = "Gabriel";
 
-	while (true == false)
-	{
-	}
+	output("Deived");
+
+	string c;
+
+	c = "Vinicius";
 	
 	
 }	
