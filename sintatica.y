@@ -349,24 +349,6 @@ EMPLACO 	:
 			}
 			;
 
-//Regra para emiplhar um contexto específico de laço
-EMPCASE 	:
-			{
-
-				string inicioLabel = "inicioCase" + to_string(lacoQtt);
-				string fimLabel = "fimCase" + to_string(lacoQtt);
-
-				//Insere na pilha
-				laco novoLaco;
-				novoLaco.labelinicio = inicioLabel;
-				novoLaco.labelfim = fimLabel;
-				pilhaLaco.push_back(novoLaco);
-
-				lacoQtt++;
-
-			}
-			;
-
 LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
 			{
 				//Pega as labels na pilha do Laço atual
@@ -770,6 +752,71 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 				//Guarda o tipo da Expressão resultante em E
 				$$.tipo = "BOOL";
 
+
+				//Verifica a conversão int para bool
+				if (!$1.tipo.compare("BOOL") && !$3.tipo.compare("int"))
+				{
+
+					//Verifica se veio apenas um número
+					if (!($3.label.find("temp") != std::string::npos)) 
+					{
+    					//Criação de variável temporária
+						string nometemp1_b = genTemp();
+						//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+						//Adiciona na tabela
+						insereVariavel(genNomeGen(), "int", nometemp1_b);
+
+						$3.traducao = $3.traducao +
+						"\t" + nometemp1_b + " = " + $3.label + ";\n";
+
+						$3.label = nometemp1_b;
+					}
+
+
+					//Criação de variável temporária
+					string nometemp1 = genTemp();
+					//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+					//Adiciona na tabela
+					insereVariavel(genNomeGen(), "BOOL", nometemp1);
+
+					//Transforma de inteiro para bool
+					$3.traducao = $3.traducao 
+					+ "\t" + nometemp1 + " = " + $3.label + " != 0;\n"
+					+ "\tif(" + nometemp1 + ")" 
+					+ "\n\t\t" + $3.label + " = TRUE;\n";
+
+				}
+				else if (!$3.tipo.compare("BOOL") && !$1.tipo.compare("int"))
+				{
+					//Verifica se veio apenas um número
+					if (!($1.label.find("temp") != std::string::npos)) 
+					{
+    					//Criação de variável temporária
+						string nometemp1_b = genTemp();
+						//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+						//Adiciona na tabela
+						insereVariavel(genNomeGen(), "int", nometemp1_b);
+
+						$1.traducao = $1.traducao +
+						"\t" + nometemp1_b + " = " + $1.label + ";\n";
+
+						$1.label = nometemp1_b;
+					}
+
+
+					//Criação de variável temporária
+					string nometemp1 = genTemp();
+					//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+					//Adiciona na tabela
+					insereVariavel(genNomeGen(), "BOOL", nometemp1);
+
+					//Transforma de inteiro para bool
+					$1.traducao = $1.traducao 
+					+ "\t" + nometemp1 + " = " + $1.label + " != 0;\n"
+					+ "\tif(" + nometemp1 + ")" 
+					+ "\n\t\t" + $1.label + " = TRUE;\n";
+				}
+
 				//Passa para EL a tradução
 				$$.traducao = $1.traducao + $3.traducao
 				+ "\t" + nometemp + " = " + $1.label + $2.traducao + $3.label + ";\n";
@@ -779,12 +826,7 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 			}
 			| OPNDOLOGIC
 			{
-				$$.traducao = "";
-			}
-			;
 
-OPNDOLOGIC	: E
-			{
 				//Criação de variável temporária
 				string nometemp = genTemp();
 
@@ -792,12 +834,30 @@ OPNDOLOGIC	: E
 				//Adiciona na tabela
 				insereVariavel(genNomeGen(), "BOOL", nometemp);
 
+				//Guarda o tipo da Expressão resultante em E
+				$$.tipo = "BOOL";
+				//Passa para E seu valor de temporária
+				$$.label = nometemp;
+
+				$$.traducao = "\t" + nometemp + " = " + $1.label + " != 0;\n";
+			}
+			;
+
+OPNDOLOGIC	: E
+			{
+				//Criação de variável temporária
+				//string nometemp = genTemp();
+
+				//Ja foram convertidas se era possível, basta pegar o tipo de qualquer  um
+				//Adiciona na tabela
+				//insereVariavel(genNomeGen(), "BOOL", nometemp);
 
 
-				$$.traducao = $1.traducao 
-				+ "\t" + nometemp + " = " + $1.label + " != 0;\n"
-				+ "\tif(" + nometemp + ")" 
-				+ "\n\t\t" + $1.label + " = TRUE;\n";
+
+				$$.traducao = $1.traducao ;
+				//+ "\t" + nometemp + " = " + $1.label + " != 0;\n"
+				//+ "\tif(" + nometemp + ")" 
+				//+ "\n\t\t" + $1.label + " = TRUE;\n";
 				$$.tipo = $1.tipo;
 				$$.label = $1.label;
 			}
@@ -815,6 +875,12 @@ OPNDOLOGIC	: E
 				$$.label = "TRUE";
 
 				$$.tipo = "BOOL";
+			}
+			| EL
+			{
+				$$.traducao = $1.traducao;
+				$$.tipo = $1.tipo;
+				$$.label = $1.label;
 			}
 			;
 //Operadores Lógicos
@@ -1004,7 +1070,7 @@ CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 				string label = labelStackEnd.top();
 				labelStackEnd.pop();
 
-				$$.traducao = $3.traducao + "\t" + nometemp + "= !" + 
+				$$.traducao = $3.traducao + "\t" + nometemp + " = !" + 
 				$3.label + ";\n" + "\tif" + "(" + nometemp + ")" + "\n\tgoto " + label + ";\n" + 
 				$5.traducao + "\tgoto " + $6.tipo + ";\n" + $6.traducao +"\t"+ $6.tipo + ":\n";
 			}

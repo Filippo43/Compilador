@@ -2,13 +2,12 @@ int main()
 {
 
 
-	string b = "Gabriel";
+	int x = 3;
 
-	output("Deived");
-
-	string c;
-
-	c = "Vinicius";
+	while (3 == 3 > 2)
+	{
+		x = 1;
+	}
 	
 	
 }	
