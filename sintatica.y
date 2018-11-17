@@ -35,9 +35,21 @@ struct laco
 	string labelfim;
 };
 
+struct _switch
+{
+	string var;
+	string comp;
+	string res;
+	string tipo;
+	bool hasDefault;
+	int defaultQtt;
+};
+
 vector < vector < variavel> > pilhaContextoVariavel;
 vector < laco > pilhaLaco;
 stack <string> labelStackEnd;
+
+stack <_switch> switchVar;
 
 string declaracoes;
 
@@ -281,7 +293,7 @@ string genNomeGen();
 
 %token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
-%token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE
+%token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_IF TK_ELSE
 
 %start S
@@ -349,6 +361,22 @@ EMPLACO 	:
 			}
 			;
 
+EMPSWITCH	:
+			{
+
+				string inicioLabel = "inicioSwitch" + to_string(lacoQtt);
+				string fimLabel = "fimSwitch" + to_string(lacoQtt);
+
+				//Insere na pilha
+				laco newSwitch;
+				newSwitch.labelinicio = inicioLabel;
+				newSwitch.labelfim = fimLabel;
+				pilhaLaco.push_back(newSwitch);
+
+				lacoQtt++;
+			}
+			;
+
 LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
 			{
 				//Pega as labels na pilha do Laço atual
@@ -363,9 +391,9 @@ LACO		: TK_WHILE '(' EL ')' EMPLACO BLOCO
 				$$.traducao = "\n\t" + lacoAtual.labelinicio + ":\n" + 
 					$3.traducao +
 					"\t" + nometemp + " = !" + $3.label + ";\n" +
-					"\tif " + nometemp + " go to " + lacoAtual.labelfim + ":\n" +
+					"\tif(" + nometemp + ")\n\t" + "goto " + lacoAtual.labelfim + ";\n" +
 					$6.traducao +
-					"\tgo to " + lacoAtual.labelinicio + ":\n" + 
+					"\tgoto " + lacoAtual.labelinicio + ";\n" + 
 					"\t" + lacoAtual.labelfim + ":\n\n";
 
 				//Desempilha laço
@@ -416,7 +444,7 @@ INTLACO 	: TK_BREAK ';'
 				laco lacoAtual = pilhaLaco.back();
 
 				//Realiza o desvio do laço em questão
-				$$.traducao = "\tgo to " + lacoAtual.labelfim + ";\n";
+				$$.traducao = "\tgoto " + lacoAtual.labelfim + ";\n";
 
 			}
 			| TK_CONTINUE ';'
@@ -783,7 +811,7 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 					$3.traducao = $3.traducao 
 					+ "\t" + nometemp1 + " = " + $3.label + " != 0;\n"
 					+ "\tif(" + nometemp1 + ")" 
-					+ "\n\t\t" + $3.label + " = TRUE;\n";
+					+ "\n\t" + $3.label + " = TRUE;\n";
 
 				}
 				else if (!$3.tipo.compare("BOOL") && !$1.tipo.compare("int"))
@@ -814,7 +842,7 @@ EL 			: OPNDOLOGIC OPLOGIC OPNDOLOGIC
 					$1.traducao = $1.traducao 
 					+ "\t" + nometemp1 + " = " + $1.label + " != 0;\n"
 					+ "\tif(" + nometemp1 + ")" 
-					+ "\n\t\t" + $1.label + " = TRUE;\n";
+					+ "\n\t" + $1.label + " = TRUE;\n";
 				}
 
 				//Passa para EL a tradução
@@ -1074,8 +1102,95 @@ CONDICIONAL : TK_IF '(' EL ')' BLOCO CONDMODIF
 				$3.label + ";\n" + "\tif" + "(" + nometemp + ")" + "\n\tgoto " + label + ";\n" + 
 				$5.traducao + "\tgoto " + $6.tipo + ";\n" + $6.traducao +"\t"+ $6.tipo + ":\n";
 			}
+			| TK_SWITCH '(' ID ')' EMPSWITCH '{' CASES '}' 
+			{	
+				variavel var;
+				_switch swt = switchVar.top();
+				switchVar.pop();
+				laco swAtual = pilhaLaco.back();
+								
+				buscaVariavel($3.label, var);
+
+				if(var.tipo.compare(swt.tipo))
+				{
+					cout << "switch and case have different types\n";
+					exit(1);
+				}
+
+				$$.traducao = "\t" + swAtual.labelinicio + ":\n\t" + swt.comp + " = " + 
+				var.identificacao + ";\n" + $7.traducao + "\t" + swAtual.labelfim + ":\n";
+
+				 //Desempilha switch
+				pilhaLaco.pop_back();
+			}
+			;
+CASE_COMP 	: TK_NUM
+			{
+				//Passa para E o tipo e seu valor
+				$$.tipo = "int";
+				$$.label = $1.label;
+			}
+			| TK_CHAR
+			{
+				$$.tipo = "char";
+				$$.label = $1.label;
+			}
+			| TK_STRING
+			{
+				$$.tipo = "string";
+				$$.label = $1.label;
+			}
+			;
+CASES 		: CASE CASES
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			| DEFAULT 
+			{
+				$$.traducao = $1.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
+			}
 			;
 
+CASE 		: TK_CASE CASE_COMP ':' COMANDOS
+			{
+				_switch swt;
+				string labelAt = gerarLabel(0);
+				if(switchVar.empty())
+				{
+					swt.var = genTemp();
+					swt.comp = genTemp();
+					swt.res = genTemp();
+					swt.tipo = $2.tipo;
+					switchVar.push(swt);
+					insereVariavel(genNomeGen(), $2.tipo, swt.var);
+					insereVariavel(genNomeGen(), $2.tipo, swt.res);
+					insereVariavel(genNomeGen(), $2.tipo, swt.comp);
+					
+				}
+
+				swt = switchVar.top();
+				
+				if(swt.tipo.compare($2.tipo))
+				{
+					cout << "Error in type switch case " + $2.tipo + " not equal " + swt.tipo + "\n";
+					exit(1);
+				}
+				
+				$$.traducao = "\t" + swt.var + " = " + $2.label + ";\n\t" + 
+				swt.res + " = " + "!(" + swt.comp + " == " + swt.var + ");" + "\n\t"
+				"if(" + swt.res + ")" + "\n\t" + "goto " + labelAt + ";"+ "\n" + 
+				$4.traducao + "\t" + labelAt + ":" + "\n" ;
+			}
+			;
+DEFAULT     : TK_DEFAULT ':' COMANDOS
+			{
+				$$.traducao = $3.traducao;
+			}
+			;
 CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 			{
 				
@@ -1095,7 +1210,6 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				labelStackEnd.push(labelEnd);
 			}
 			| TK_ELSE BLOCO
-
 			{
 				
 				string label = gerarLabelEndif();

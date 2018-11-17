@@ -31,7 +31,8 @@ CASE (case){NUM}
 "break"		{return TK_BREAK;}
 
 "continue"	{return TK_CONTINUE;}
-
+"case"		{return TK_CASE;}
+"default"	{return TK_DEFAULT;}
 "main"		{return TK_MAIN;}
 
 "int"		{return TK_TIPO_INT;}
@@ -60,12 +61,11 @@ CASE (case){NUM}
 
 "real"		{return TK_TIPO_REAL;}
 
-[(){}[\];,=<>!]	{ return *yytext; }
+[:(){}[\];,=<>!]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 
 
-{CASE}		{ yylval.label = yytext; return TK_CASE; }
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {CHAR}		{ yylval.label = yytext; return TK_CHAR; }
 {REAL}		{ yylval.label = yytext; return TK_REAL; }

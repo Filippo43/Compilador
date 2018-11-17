@@ -1,12 +1,23 @@
 int main()
 {
+	int x = 10;
+	int k;
 
-
-	int x = 3;
-
-	while (3 == 3 > 2)
+	switch(x)
 	{
-		x = 1;
+		case 0:
+			k = 10;
+		break;
+
+		case 1:
+			k = 12;
+		break;
+		case 2:
+			k = 1;
+		break;
+		default:
+
+			k = 0;
 	}
 	
 	
