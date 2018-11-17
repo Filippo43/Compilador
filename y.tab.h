@@ -186,35 +186,36 @@ typedef
 
 
  #line 169 "/usr/share/bison++/bison.h"
-#define	TK_NUM	258
-#define	TK_REAL	259
-#define	TK_BOOL	260
-#define	TK_CHAR	261
-#define	TK_WHILE	262
-#define	TK_FOR	263
-#define	TK_DO	264
-#define	TK_BREAK	265
-#define	TK_CONTINUE	266
-#define	TK_MAIN	267
-#define	TK_ID	268
-#define	TK_TIPO_INT	269
-#define	TK_TIPO_REAL	270
-#define	TK_TIPO_BOOL	271
-#define	TK_TIPO_CHAR	272
-#define	TK_STRING	273
-#define	TK_TIPO_STRING	274
-#define	TK_FIM	275
-#define	TK_ERROR	276
-#define	TK_INPUT	277
-#define	TK_OUTPUT	278
-#define	TK_SWITCH	279
-#define	TK_CASE	280
-#define	TK_DEFAULT	281
-#define	TK_IF	282
-#define	TK_ELSE	283
-#define	TK_FUNCTION	284
-#define	TK_RETURN	285
-#define	TK_PROCEDURE	286
+#define	TK_IS	258
+#define	TK_NUM	259
+#define	TK_REAL	260
+#define	TK_BOOL	261
+#define	TK_CHAR	262
+#define	TK_WHILE	263
+#define	TK_FOR	264
+#define	TK_DO	265
+#define	TK_BREAK	266
+#define	TK_CONTINUE	267
+#define	TK_MAIN	268
+#define	TK_ID	269
+#define	TK_TIPO_INT	270
+#define	TK_TIPO_REAL	271
+#define	TK_TIPO_BOOL	272
+#define	TK_TIPO_CHAR	273
+#define	TK_STRING	274
+#define	TK_TIPO_STRING	275
+#define	TK_FIM	276
+#define	TK_ERROR	277
+#define	TK_INPUT	278
+#define	TK_OUTPUT	279
+#define	TK_SWITCH	280
+#define	TK_CASE	281
+#define	TK_DEFAULT	282
+#define	TK_IF	283
+#define	TK_ELSE	284
+#define	TK_FUNCTION	285
+#define	TK_RETURN	286
+#define	TK_PROCEDURE	287
 
 
 #line 169 "/usr/share/bison++/bison.h"
@@ -263,6 +264,7 @@ public:
   /* static const int token ... */
   
  #line 212 "/usr/share/bison++/bison.h"
+static const int TK_IS;
 static const int TK_NUM;
 static const int TK_REAL;
 static const int TK_BOOL;
@@ -300,35 +302,36 @@ static const int TK_PROCEDURE;
   enum YY_parse_ENUM_TOKEN { YY_parse_NULL_TOKEN=0
   
  #line 215 "/usr/share/bison++/bison.h"
-	,TK_NUM=258
-	,TK_REAL=259
-	,TK_BOOL=260
-	,TK_CHAR=261
-	,TK_WHILE=262
-	,TK_FOR=263
-	,TK_DO=264
-	,TK_BREAK=265
-	,TK_CONTINUE=266
-	,TK_MAIN=267
-	,TK_ID=268
-	,TK_TIPO_INT=269
-	,TK_TIPO_REAL=270
-	,TK_TIPO_BOOL=271
-	,TK_TIPO_CHAR=272
-	,TK_STRING=273
-	,TK_TIPO_STRING=274
-	,TK_FIM=275
-	,TK_ERROR=276
-	,TK_INPUT=277
-	,TK_OUTPUT=278
-	,TK_SWITCH=279
-	,TK_CASE=280
-	,TK_DEFAULT=281
-	,TK_IF=282
-	,TK_ELSE=283
-	,TK_FUNCTION=284
-	,TK_RETURN=285
-	,TK_PROCEDURE=286
+	,TK_IS=258
+	,TK_NUM=259
+	,TK_REAL=260
+	,TK_BOOL=261
+	,TK_CHAR=262
+	,TK_WHILE=263
+	,TK_FOR=264
+	,TK_DO=265
+	,TK_BREAK=266
+	,TK_CONTINUE=267
+	,TK_MAIN=268
+	,TK_ID=269
+	,TK_TIPO_INT=270
+	,TK_TIPO_REAL=271
+	,TK_TIPO_BOOL=272
+	,TK_TIPO_CHAR=273
+	,TK_STRING=274
+	,TK_TIPO_STRING=275
+	,TK_FIM=276
+	,TK_ERROR=277
+	,TK_INPUT=278
+	,TK_OUTPUT=279
+	,TK_SWITCH=280
+	,TK_CASE=281
+	,TK_DEFAULT=282
+	,TK_IF=283
+	,TK_ELSE=284
+	,TK_FUNCTION=285
+	,TK_RETURN=286
+	,TK_PROCEDURE=287
 
 
 #line 215 "/usr/share/bison++/bison.h"

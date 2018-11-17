@@ -1,18 +1,19 @@
-
-function Soma(int a, int b) return int
+function Soma(int a, int b) return int is
 {
-	int vasco = 100;
+	int vasco = 10;
+
+	vasco = 10 + 20;
 
 	return vasco;
+
 }
+
 
 int main()
 {
-	int x = 10;
-	int y = 30;
-	int z = 20;
-
 	int res;
-	
-	res = Soma(x, y);
+	int x = 30;
+	int y = 20;
+
+	res = Soma(x , y);
 }	

@@ -38,6 +38,7 @@ CASE (case){NUM}
 "case"		{return TK_CASE;}
 "default"	{return TK_DEFAULT;}
 "main"		{return TK_MAIN;}
+"is"		{return TK_IS;}
 
 "int"		{return TK_TIPO_INT;}
 
@@ -65,7 +66,7 @@ CASE (case){NUM}
 
 "real"		{return TK_TIPO_REAL;}
 
-[:(){}[\];,=<>!]	{ return *yytext; }
+[(){}[\];,=<>!:]	{ return *yytext; }
 
 [+\-*/]		{ return *yytext; }
 

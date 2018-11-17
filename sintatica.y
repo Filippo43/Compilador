@@ -299,11 +299,12 @@ string genTemp();
 string genNomeGen();
 %}
 
+%token TK_IS
 %token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
 %token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_IF TK_ELSE
-%token TK_FUNCTION TK_RETURN TK_PROCEDURE
+%token TK_FUNCTION TK_RETURN TK_PROCEDURE 
 
 %start S
 
@@ -639,7 +640,7 @@ ATRIBUICAO 	: ID OPATRIB ';'
 						$$.traducao = $2.traducao + "\t" + var.identificacao + " = " + $2.label + ";\n";
 				}
 			}
-
+			;
 			
 //Declarações
 DECLARACAO	: TIPO ID OPATRIB ';'
@@ -1248,7 +1249,7 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				$$.tipo = label;
 			}
 			;
-FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO BLOCO
+FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 			{
 				_function func;
 				
@@ -1256,13 +1257,14 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO BLOCO
 
 				func.label =  $2.label;
 
-				$$.traducao = "\t" + $8.tipo + " " + $2.label  + 
-				"(" + $4.traducao + $5.traducao + ")\n\t{\n\t" + $9.traducao + "\n\t}\n";
+				$$.traducao = $8.tipo + " " + $2.label  + 
+				"(" + $4.traducao + $5.traducao + ")\n{\n" + $10.traducao + "\n}\n";
 			}
+			|
 			;
 RETURN      : TK_RETURN IT ';'
 			{
-				$$.traducao = "\t\treturn " + $2.traducao + ";\n";
+				$$.traducao = "\treturn " + $2.traducao + ";\n";
 			}
 			;
 IT          : E
@@ -1304,29 +1306,29 @@ PAR         : TIPO ID
 
 				func.functionContext.push_back(var);
 				functions.push(func);
+				//insereVariavel(var.nome, var.tipo, var.identificacao);
 
 				$$.traducao = $1.tipo + " " + var.identificacao;
 			}
 			;
 
-CALL_FUNC   : TK_ID '=' TK_ID '(' ONE_PAR MORE_PARS ')' ';'
-			{
-
-			}
-			;
-
-ONE_PAR     : TK_ID
+CALL_FUNC   : ID '=' ID '(' ONE_PAR MORE_PARS ')' ';'
 			{
 
 			}
 			;
 MORE_PARS   : ',' ONE_PAR MORE_PARS
 			{
-
+				$$.traducao = $2.traducao + $3.traducao;
 			}
 			|
 			{
-
+				$$.traducao = "";
+			}
+			;
+ONE_PAR     : ID
+			{
+				$$.traducao = $1. traducao;
 			}
 			;
 
