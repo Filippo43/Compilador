@@ -1,13 +1,17 @@
 
-function Soma(int a, int b ) return int;
+function Soma(int a, int b) return int
 {
+	int vasco = 100;
 
+	return vasco;
 }
 
 int main()
 {
 	int x = 10;
 	int y = 30;
+	int z = 20;
+
 	int res;
 	
 	res = Soma(x, y);

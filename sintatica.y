@@ -54,7 +54,7 @@ struct _function
 
 vector < vector < variavel> > pilhaContextoVariavel;
 vector < laco > pilhaLaco;
-vector <_function> functions;
+stack <_function> functions;
 stack <string> labelStackEnd;
 
 stack <_switch> switchVar;
@@ -303,7 +303,7 @@ string genNomeGen();
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
 %token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_IF TK_ELSE
-%token TK_FUNCTION TK_RETURN
+%token TK_FUNCTION TK_RETURN TK_PROCEDURE
 
 %start S
 
@@ -702,6 +702,10 @@ COMANDO 	: DECLARACAO
 				$$.traducao = $1.traducao;
 			}
 			| CALL_FUNC
+			{
+				$$.traducao = $1.traducao;
+			}
+			| RETURN 
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -1244,23 +1248,64 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				$$.tipo = label;
 			}
 			;
-FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO ';' BLOCO
+FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO BLOCO
+			{
+				_function func;
+				
+				func = functions.top();
+
+				func.label =  $2.label;
+
+				$$.traducao = "\t" + $8.tipo + " " + $2.label  + 
+				"(" + $4.traducao + $5.traducao + ")\n\t{\n\t" + $9.traducao + "\n\t}\n";
+			}
+			;
+RETURN      : TK_RETURN IT ';'
+			{
+				$$.traducao = "\t\treturn " + $2.traducao + ";\n";
+			}
+			;
+IT          : E
+			{
+				$$.traducao = $1.label;
+			}
+			| TK_STRING 
+			{
+
+			}
+			|
 			{
 
 			}
 			;
-ARGS		: ',' PAR ARGS
+ARGS		: VIRG PAR ARGS
 			{
-				$$.traducao = $1.traducao + $2.traducao
+				$$.traducao = $1.traducao + $2.traducao + $3.traducao;
 			}
 			|
 			{
 				$$.traducao = "";
 			}
 			;
+VIRG        : ','
+			{
+				$$.traducao = ","
+			}
+			;
 PAR         : TIPO ID
 			{
-				$$.traducao = $1.traducao + " " + $2.traducao;
+				_function func;
+
+				variavel var;
+
+				var.identificacao = genTemp();
+				var.tipo = $1.tipo;
+				var.nome = genNomeGen();
+
+				func.functionContext.push_back(var);
+				functions.push(func);
+
+				$$.traducao = $1.tipo + " " + var.identificacao;
 			}
 			;
 

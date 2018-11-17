@@ -32,6 +32,7 @@ CASE (case){NUM}
 
 "continue"	{return TK_CONTINUE;}
 "function"	{return TK_FUNCTION;}
+"procedure" {return TK_PROCEDURE;}
 "return"	{return TK_RETURN;}
 
 "case"		{return TK_CASE;}
