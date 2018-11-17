@@ -31,6 +31,9 @@ CASE (case){NUM}
 "break"		{return TK_BREAK;}
 
 "continue"	{return TK_CONTINUE;}
+"function"	{return TK_FUNCTION;}
+"return"	{return TK_RETURN;}
+
 "case"		{return TK_CASE;}
 "default"	{return TK_DEFAULT;}
 "main"		{return TK_MAIN;}

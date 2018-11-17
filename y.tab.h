@@ -212,6 +212,8 @@ typedef
 #define	TK_DEFAULT	281
 #define	TK_IF	282
 #define	TK_ELSE	283
+#define	TK_FUNCTION	284
+#define	TK_RETURN	285
 
 
 #line 169 "/usr/share/bison++/bison.h"
@@ -286,6 +288,8 @@ static const int TK_CASE;
 static const int TK_DEFAULT;
 static const int TK_IF;
 static const int TK_ELSE;
+static const int TK_FUNCTION;
+static const int TK_RETURN;
 
 
 #line 212 "/usr/share/bison++/bison.h"
@@ -320,6 +324,8 @@ static const int TK_ELSE;
 	,TK_DEFAULT=281
 	,TK_IF=282
 	,TK_ELSE=283
+	,TK_FUNCTION=284
+	,TK_RETURN=285
 
 
 #line 215 "/usr/share/bison++/bison.h"

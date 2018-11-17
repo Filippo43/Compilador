@@ -45,8 +45,16 @@ struct _switch
 	int defaultQtt;
 };
 
+struct _function
+{
+	vector <variavel> functionContext;
+	stack <_function> fctx;
+	string label;
+};
+
 vector < vector < variavel> > pilhaContextoVariavel;
 vector < laco > pilhaLaco;
+vector <_function> functions;
 stack <string> labelStackEnd;
 
 stack <_switch> switchVar;
@@ -295,6 +303,7 @@ string genNomeGen();
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
 %token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_IF TK_ELSE
+%token TK_FUNCTION TK_RETURN
 
 %start S
 
@@ -685,6 +694,14 @@ COMANDO 	: DECLARACAO
 				$$.traducao = $1.traducao;
 			}
 			| OUTPUT
+			{
+				$$.traducao = $1.traducao;
+			}
+			| FUNCTION
+			{
+				$$.traducao = $1.traducao;
+			}
+			| CALL_FUNC
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -1225,6 +1242,46 @@ CONDMODIF   :TK_ELSE TK_IF '(' EL ')' BLOCO CONDMODIF
 				string label = gerarLabelEndif();
 				labelStackEnd.push(label);
 				$$.tipo = label;
+			}
+			;
+FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO ';' BLOCO
+			{
+
+			}
+			;
+ARGS		: ',' PAR ARGS
+			{
+				$$.traducao = $1.traducao + $2.traducao
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
+PAR         : TIPO ID
+			{
+				$$.traducao = $1.traducao + " " + $2.traducao;
+			}
+			;
+
+CALL_FUNC   : TK_ID '=' TK_ID '(' ONE_PAR MORE_PARS ')' ';'
+			{
+
+			}
+			;
+
+ONE_PAR     : TK_ID
+			{
+
+			}
+			;
+MORE_PARS   : ',' ONE_PAR MORE_PARS
+			{
+
+			}
+			|
+			{
+
 			}
 			;
 
