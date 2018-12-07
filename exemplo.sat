@@ -2,7 +2,6 @@ function Soma(int a, int b) return int is
 {
 	int vasco = 10;
 
-	vasco = 10 + 20;
 
 	return vasco;
 

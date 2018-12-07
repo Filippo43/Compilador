@@ -65,6 +65,7 @@ int tempGenQtt = 0;
 int nomeGenQtt = 0;
 int lacoQtt = 0;
 int caseQtt = 0;
+int funcQtt = 0;
 
 //Verifica se já existe uma variável com esse nome
 bool existeNome(string nome);
@@ -75,7 +76,6 @@ void empilhaContexto()
 	vector <variavel> tabelaVariaveis;
 
 	pilhaContextoVariavel.push_back(tabelaVariaveis);
-
 }
 
 string gerarLabelEndif(void)
@@ -97,6 +97,7 @@ string gerarLabel(int base)
 
 	return buffer;
 }
+
 
 
 void desempilhaContexto()
@@ -178,6 +179,7 @@ bool existeNome(string nome)
 void buscaVariavel(string nome, variavel &var)
 {
 
+	vector <variavel> localsVar;
 	//Percorre os contextos do fim ao início
 	for(std::vector< vector <variavel> >::reverse_iterator it = pilhaContextoVariavel.rbegin(); it != pilhaContextoVariavel.rend(); it++)    
 	{
@@ -196,7 +198,6 @@ void buscaVariavel(string nome, variavel &var)
 			//Aponta pra uma variável
 			variavel temp = *it;
 
-			//Se achou o nome
 			if (!temp.nome.compare(nome))
 			{
 				var = temp;
@@ -204,7 +205,25 @@ void buscaVariavel(string nome, variavel &var)
 			}
     
 		}
+	}
 
+	if(!functions.empty())
+	{
+		_function f;
+		f = functions.top();
+		localsVar = f.functionContext;
+		cout << f.functionContext.front().nome;
+			cout << f.functionContext.back().nome;
+		for(std::vector<variavel>::iterator i = localsVar.begin(); i != localsVar.end(); i++)
+		{
+			variavel temp = *i;
+		//	cout << temp.nome + "\n";
+			if(!temp.nome.compare(nome))
+			{
+				var = temp;
+				return;
+			}
+		}
 	}
 
 	//Sinaliza erro
@@ -1077,6 +1096,7 @@ E 			: E '/' E
 				
 
 				//Tenta buscar a variável
+				
 				buscaVariavel($1.label, var);
 
 				//Passa o tipo e o nome para E
@@ -1254,9 +1274,8 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 				_function func;
 				
 				func = functions.top();
-
+				funcQtt++;
 				func.label =  $2.label;
-
 				$$.traducao = $8.tipo + " " + $2.label  + 
 				"(" + $4.traducao + $5.traducao + ")\n{\n" + $10.traducao + "\n}\n";
 			}
@@ -1291,23 +1310,34 @@ ARGS		: VIRG PAR ARGS
 			;
 VIRG        : ','
 			{
-				$$.traducao = ","
+				$$.traducao = ",";
 			}
 			;
 PAR         : TIPO ID
 			{
 				_function func;
-
 				variavel var;
 
-				var.identificacao = genTemp();
-				var.tipo = $1.tipo;
-				var.nome = genNomeGen();
+				if(functions.empty())
+				{
 
-				func.functionContext.push_back(var);
-				functions.push(func);
+					var.identificacao = genTemp();
+					var.tipo = $1.tipo;
+					var.nome = $2.label;//genNomeGen();
+					func.functionContext.push_back(var);
+
+					functions.push(func);
+				}
+				else
+				{
+					func = functions.top();
+					var.identificacao = genTemp();
+					var.tipo = $1.tipo;
+					var.nome = $2.label;//genNomeGen();
+					func.functionContext.push_back(var);
+				}
+
 				//insereVariavel(var.nome, var.tipo, var.identificacao);
-
 				$$.traducao = $1.tipo + " " + var.identificacao;
 			}
 			;
