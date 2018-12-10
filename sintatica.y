@@ -53,8 +53,9 @@ struct _function
 };
 
 vector < vector < variavel> > pilhaContextoVariavel;
+vector <variavel> funcContext;
 vector < laco > pilhaLaco;
-stack <_function> functions;
+vector <_function> functions;
 stack <string> labelStackEnd;
 
 stack <_switch> switchVar;
@@ -207,17 +208,11 @@ void buscaVariavel(string nome, variavel &var)
 		}
 	}
 
-	if(!functions.empty())
+	if(!funcContext.empty())
 	{
-		_function f;
-		f = functions.top();
-		localsVar = f.functionContext;
-		cout << f.functionContext.front().nome;
-			cout << f.functionContext.back().nome;
-		for(std::vector<variavel>::iterator i = localsVar.begin(); i != localsVar.end(); i++)
+		for(std::vector<variavel>::iterator i = funcContext.begin(); i != funcContext.end(); i++)
 		{
 			variavel temp = *i;
-		//	cout << temp.nome + "\n";
 			if(!temp.nome.compare(nome))
 			{
 				var = temp;
@@ -1273,9 +1268,11 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 			{
 				_function func;
 				
-				func = functions.top();
-				funcQtt++;
+				func.functionContext = funcContext;
 				func.label =  $2.label;
+				funcContext.erase(funcContext.begin(), funcContext.end());
+				functions.push_back(func);
+				funcQtt++;
 				$$.traducao = $8.tipo + " " + $2.label  + 
 				"(" + $4.traducao + $5.traducao + ")\n{\n" + $10.traducao + "\n}\n";
 			}
@@ -1292,11 +1289,11 @@ IT          : E
 			}
 			| TK_STRING 
 			{
-
+				$$.traducao = $1.traducao;
 			}
 			|
 			{
-
+				$$.traducao = "";
 			}
 			;
 ARGS		: VIRG PAR ARGS
@@ -1310,46 +1307,44 @@ ARGS		: VIRG PAR ARGS
 			;
 VIRG        : ','
 			{
-				$$.traducao = ",";
+				$$.traducao = ", ";
 			}
 			;
 PAR         : TIPO ID
 			{
-				_function func;
 				variavel var;
 
-				if(functions.empty())
-				{
+				var.identificacao = genTemp();
+				var.tipo = $1.tipo;
+				var.nome = $2.label;//genNomeGen();
+				funcContext.push_back(var);
 
-					var.identificacao = genTemp();
-					var.tipo = $1.tipo;
-					var.nome = $2.label;//genNomeGen();
-					func.functionContext.push_back(var);
-
-					functions.push(func);
-				}
-				else
-				{
-					func = functions.top();
-					var.identificacao = genTemp();
-					var.tipo = $1.tipo;
-					var.nome = $2.label;//genNomeGen();
-					func.functionContext.push_back(var);
-				}
-
-				//insereVariavel(var.nome, var.tipo, var.identificacao);
 				$$.traducao = $1.tipo + " " + var.identificacao;
 			}
 			;
 
 CALL_FUNC   : ID '=' ID '(' ONE_PAR MORE_PARS ')' ';'
 			{
+				variavel var;
 
+				buscaVariavel($1.label, var);
+
+				for(vector<_function>::iterator f = functions.begin(); f != functions.end(); f++)
+				{
+					_function temp = *f;
+					if(!temp.label.compare($3.label))
+					{
+						break;
+					}
+				}
+
+				$$.traducao = "\t" + var.identificacao + " = " + $3.label + "(" +
+				$5.traducao + $6.traducao + ")" + ";\n";
 			}
 			;
-MORE_PARS   : ',' ONE_PAR MORE_PARS
+MORE_PARS   : VIRG ONE_PAR MORE_PARS
 			{
-				$$.traducao = $2.traducao + $3.traducao;
+				$$.traducao = $1.traducao + $2.traducao + $3.traducao;
 			}
 			|
 			{
@@ -1358,7 +1353,12 @@ MORE_PARS   : ',' ONE_PAR MORE_PARS
 			;
 ONE_PAR     : ID
 			{
-				$$.traducao = $1. traducao;
+				variavel var;
+
+				buscaVariavel($1.label, var);
+
+				$$.traducao = var.identificacao;
+				$$.label = $1.label;
 			}
 			;
 
