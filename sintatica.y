@@ -52,10 +52,19 @@ struct _function
 	string label;
 };
 
+struct _procedure
+{
+	vector <variavel> procedureContext;
+	stack <_function> pctx;
+	string label;
+};
+
 vector < vector < variavel> > pilhaContextoVariavel;
 vector <variavel> funcContext;
+vector <variavel> procContext;
 vector < laco > pilhaLaco;
 vector <_function> functions;
+vector <_procedure> procedures;
 stack <string> labelStackEnd;
 
 stack <_switch> switchVar;
@@ -211,6 +220,19 @@ void buscaVariavel(string nome, variavel &var)
 	if(!funcContext.empty())
 	{
 		for(std::vector<variavel>::iterator i = funcContext.begin(); i != funcContext.end(); i++)
+		{
+			variavel temp = *i;
+			if(!temp.nome.compare(nome))
+			{
+				var = temp;
+				return;
+			}
+		}
+	}
+
+	if(!procContext.empty())
+	{
+		for(std::vector<variavel>::iterator i = procContext.begin(); i != procContext.end(); i++)
 		{
 			variavel temp = *i;
 			if(!temp.nome.compare(nome))
@@ -721,6 +743,14 @@ COMANDO 	: DECLARACAO
 				$$.traducao = $1.traducao;
 			}
 			| RETURN 
+			{
+				$$.traducao = $1.traducao;
+			}
+			| PROCEDURE
+			{
+				$$.traducao = $1.traducao;
+			}
+			| CALL_PROC
 			{
 				$$.traducao = $1.traducao;
 			}
@@ -1278,6 +1308,18 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 			}
 			|
 			;
+PROCEDURE   : TK_PROCEDURE ID '(' PARGS ')' TK_IS BLOCO
+			{
+				_procedure proc;
+				proc.procedureContext = procContext;
+				proc.label = $2.label;
+				procContext.erase(procContext.begin(), procContext.end());
+				procedures.push_back(proc);
+
+				$$.traducao = "void " + $2.label + "(" + $4.traducao + ")" +
+				"\n{\n" + $7.traducao + "\n}\n";
+			}
+			;
 RETURN      : TK_RETURN IT ';'
 			{
 				$$.traducao = "\treturn " + $2.traducao + ";\n";
@@ -1305,6 +1347,25 @@ ARGS		: VIRG PAR ARGS
 				$$.traducao = "";
 			}
 			;
+
+PARGS       : PPAR PARGS
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
+PARGS       : VIRG PPAR PARGS
+			{
+				$$.traducao = $1.traducao + $2.traducao + $3.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
 VIRG        : ','
 			{
 				$$.traducao = ", ";
@@ -1322,6 +1383,20 @@ PAR         : TIPO ID
 				$$.traducao = $1.tipo + " " + var.identificacao;
 			}
 			;
+
+PPAR        : TIPO ID
+			{
+				variavel var;
+
+				var.identificacao = genTemp();
+				var.tipo = $1.tipo;
+				var.nome = $2.label;//genNomeGen();
+				procContext.push_back(var);
+
+				$$.traducao = $1.tipo + " " + var.identificacao;
+			}
+			;
+
 
 CALL_FUNC   : ID '=' ID '(' ONE_PAR MORE_PARS ')' ';'
 			{
@@ -1342,6 +1417,11 @@ CALL_FUNC   : ID '=' ID '(' ONE_PAR MORE_PARS ')' ';'
 				$5.traducao + $6.traducao + ")" + ";\n";
 			}
 			;
+CALL_PROC   : ID '('PARS ')' ';'
+			{
+				$$.traducao = "\t" + $1.label + "(" + $3.traducao + ")"+ ";\n";
+			}
+			;
 MORE_PARS   : VIRG ONE_PAR MORE_PARS
 			{
 				$$.traducao = $1.traducao + $2.traducao + $3.traducao;
@@ -1359,6 +1439,24 @@ ONE_PAR     : ID
 
 				$$.traducao = var.identificacao;
 				$$.label = $1.label;
+			}
+			;
+PARS        : ONE_PAR P_MORE_ARGS
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
+			}
+			;
+P_MORE_ARGS : VIRG ONE_PAR P_MORE_ARGS
+			{
+				$$.traducao = $1.traducao + $2.traducao + $3.traducao;
+			}
+			|
+			{
+				$$.traducao = "";
 			}
 			;
 
