@@ -59,6 +59,7 @@ struct _procedure
 	string label;
 };
 
+
 vector < vector < variavel> > pilhaContextoVariavel;
 vector <variavel> funcContext;
 vector <variavel> procContext;
@@ -255,29 +256,29 @@ void atualizaRegraExprAritimetica(atributos &E1, atributos &E2)
 {
 	//INT x FLOAT -> (float)
 	if (!E1.tipo.compare("int")
-	&& !E2.tipo.compare("real"))
+	&& !E2.tipo.compare("REAL"))
 	{
 		//Criação de variável temporária
 		string nomeTemp = genTemp();
 
 		//Tenta inserir variável
-		insereVariavel(genNomeGen(), "real", nomeTemp);
+		insereVariavel(genNomeGen(), "REAL", nomeTemp);
 
-		E1.tipo = "real";
-		E1.traducao = E1.traducao + "\t" + nomeTemp + " = (Real) " + E1.label + ";\n"; 
+		E1.tipo = "REAL";
+		E1.traducao = E1.traducao + "\t" + nomeTemp + " = (REAL) " + E1.label + ";\n"; 
 		E1.label = nomeTemp;
 	}
-	else if (!E1.tipo.compare("real")
+	else if (!E1.tipo.compare("REAL")
 	&& !E2.tipo.compare("int"))
 	{
 		//Criação de variável temporária
 		string nomeTemp = genTemp();
 
 		//Tenta inserir variável
-		insereVariavel(genNomeGen(), "real", nomeTemp);
+		insereVariavel(genNomeGen(), "REAL", nomeTemp);
 
-		E2.tipo = "real";
-		E2.traducao = E2.traducao + "\t" + nomeTemp + " = (Real) " + E2.label + ";\n"; 
+		E2.tipo = "REAL";
+		E2.traducao = E2.traducao + "\t" + nomeTemp + " = (REAL) " + E2.label + ";\n"; 
 		E2.label = nomeTemp;
 	}
 	//Se os tipos são diferentes e desconhecidos
@@ -300,10 +301,10 @@ void verificaAtribuicao (string tipo1, string tipo2)
 			||!tipo2.compare("BOOL"))
 			return;
 	}
-	else if (!tipo1.compare("real"))
+	else if (!tipo1.compare("REAL"))
 	{
 		if(!tipo2.compare("int")
-			|| !tipo2.compare("real"))
+			|| !tipo2.compare("REAL"))
 			return;
 		
 	}
@@ -354,7 +355,7 @@ S 			: CMDSGLOBAL
 			{
 				desempilhaContexto();
 
-				cout << "#define TRUE 1\n#define FALSE 0\n#define BOOL int\n\n" 
+				cout << "#define TRUE 1\n#define FALSE 0\n#define BOOL int\n#define REAL float\n\n" 
 				+ declaracoes + "\n" +  $1.traducao + "\n";
 
 				//Regex para dar free em char*
@@ -676,6 +677,36 @@ ATRIBUICAO 	: ID OPATRIB ';'
 						$$.traducao = $2.traducao + "\t" + var.identificacao + " = " + $2.label + ";\n";
 				}
 			}
+			| ID '[' E ']' OPATRIB ';'
+			{
+				
+				if ($3.tipo.compare("int"))
+				{
+					cout << "\tErro: O índice de um array deve ser inteiro!\n";
+					exit(1);
+				}
+
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+				
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				//Compara atribuição 
+				verificaAtribuicao(var.tipo, $5.tipo);
+				
+				//Verifica se teve atribuição
+				if ($2.tipo.compare("null"))
+				{
+					if (var.tipo.compare($5.tipo))
+						$$.traducao = $3.traducao 
+						+ $5.traducao + "\t" + "(" + var.identificacao + " + " + $3.label + ")* = (" + var.tipo + ") " + $5.label + ";\n";
+					else
+						$$.traducao = $3.traducao 
+						+ $5.traducao + "\t" + "(" + var.identificacao + " + " + $3.label + ")* = " + $5.label + ";\n";
+				}
+			}
 			;
 			
 //Declarações
@@ -700,6 +731,35 @@ DECLARACAO	: TIPO ID OPATRIB ';'
 					else
 						$$.traducao = $3.traducao + "\t" + nomeTemp + " = " + $3.label + ";\n";
 				}
+			}
+			| TIPO ID '[' E ']' ';'
+			{
+
+				if ($4.tipo.compare("int"))
+				{
+					cout << "\tErro: O tamanho de um array é inteiro!\n";
+					exit(1);
+				}
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+				string nomeTemp1 = nomeTemp;
+
+				nomeTemp = nomeTemp + "_s";
+
+				string tipoBase = $1.tipo;
+				$1.tipo = $1.tipo + "*";
+	
+				
+				//Tenta inserir variável
+				insereVariavel($2.label, $1.tipo , nomeTemp1);
+				insereVariavel(genNomeGen(), "int" , nomeTemp);
+
+				//Verifica se teve atribuição
+				$$.traducao = $4.traducao + "\t" + nomeTemp + " = " + $4.label + ";\n"
+				+ "\t" + nomeTemp1 + " = (" + $1.tipo + ") malloc (" + nomeTemp + " * sizeof(" + tipoBase + "));\n";
+				
+
 			}
 			;
 
@@ -815,7 +875,7 @@ TIPO 	    : TK_TIPO_INT
 			}
 			| TK_TIPO_REAL
 			{
-				$$.tipo = "real";
+				$$.tipo = "REAL";
 			}
 			| TK_TIPO_BOOL
 			{
@@ -1108,7 +1168,7 @@ E 			: E '/' E
 			| TK_REAL
 			{
 				//Passa para E o tipo e seu valor
-				$$.tipo = "real";
+				$$.tipo = "REAL";
 				$$.label = $1.label;
 			}
 			
