@@ -626,6 +626,35 @@ OPATRIB		: '=' TK_CHAR
 				$$.traducao = $2.traducao;
 				$$.tipo = $2.tipo;
 			}
+			| '=' ID '[' E ']'
+			{
+
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($2.label, var);
+
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				$$.traducao = "";
+				$$.tipo = var.tipo;
+				$$.label = "*(" + var.identificacao + " + " + $4.label + ")";
+
+			}
+			| '=' ID '[' E ']' '[' E ']'
+			{
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($2.label, var);
+
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				$$.traducao = "";
+				$$.tipo = var.tipo;
+				$$.label = "*(" + var.identificacao + " + " + $4.label + " * " + var.identificacao + "_d + " + $7.label + ")";
+
+			}
 			|
 			{
 			
@@ -697,7 +726,7 @@ ATRIBUICAO 	: ID OPATRIB ';'
 				verificaAtribuicao(var.tipo, $5.tipo);
 				
 				//Verifica se teve atribuição
-				if ($2.tipo.compare("null"))
+				if ($5.tipo.compare("null"))
 				{
 					if (var.tipo.compare($5.tipo))
 						$$.traducao = $3.traducao 
@@ -705,6 +734,36 @@ ATRIBUICAO 	: ID OPATRIB ';'
 					else
 						$$.traducao = $3.traducao 
 						+ $5.traducao + "\t" + "(" + var.identificacao + " + " + $3.label + ")* = " + $5.label + ";\n";
+				}
+			}
+			| ID '[' E ']' '[' E ']' OPATRIB ';'
+			{
+				
+				if ($3.tipo.compare("int") && $6.tipo.compare("int"))
+				{
+					cout << "\tErro: O índice de um array deve ser inteiro!\n";
+					exit(1);
+				}
+
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+				
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				//Compara atribuição 
+				verificaAtribuicao(var.tipo, $8.tipo);
+				
+				//Verifica se teve atribuição
+				if ($8.tipo.compare("null"))
+				{
+					if (var.tipo.compare($8.tipo))
+						$$.traducao = $3.traducao + $6.traducao + $8.traducao +
+						"\t" + "(" + var.identificacao + " + " + $3.label + " * " + var.identificacao + "_d + " + $6.label + ")* = (" + var.tipo + ") " + $8.label + ";\n";
+					else
+						$$.traducao = $3.traducao + $6.traducao + $8.traducao +
+						"\t" + "(" + var.identificacao + " + " + $3.label + " * " + var.identificacao + "_d + " + $6.label + ")* = " + $8.label + ";\n";
 				}
 			}
 			;
@@ -758,6 +817,40 @@ DECLARACAO	: TIPO ID OPATRIB ';'
 				//Verifica se teve atribuição
 				$$.traducao = $4.traducao + "\t" + nomeTemp + " = " + $4.label + ";\n"
 				+ "\t" + nomeTemp1 + " = (" + $1.tipo + ") malloc (" + nomeTemp + " * sizeof(" + tipoBase + "));\n";
+				
+
+			}
+			| TIPO ID '[' E ']' '[' E ']' ';'
+			{
+
+				if ($4.tipo.compare("int") && $7.tipo.compare("int"))
+				{
+					cout << "\tErro: O tamanho de um array é inteiro!\n";
+					exit(1);
+				}
+
+				//Criação de variável temporária
+				string nomeTemp = genTemp();
+				string nomeTemp1 = nomeTemp;
+				string nomeTemp2 = nomeTemp;
+
+				nomeTemp1 = nomeTemp1 + "_s";
+				nomeTemp2 = nomeTemp2 + "_d";
+
+				string tipoBase = $1.tipo;
+				$1.tipo = $1.tipo + "*";
+	
+				
+				//Tenta inserir variável
+				insereVariavel($2.label, $1.tipo , nomeTemp);
+				insereVariavel(genNomeGen(), "int" , nomeTemp1);
+				insereVariavel(genNomeGen(), "int" , nomeTemp2);
+
+				//Declara
+				$$.traducao = $4.traducao + $7.traducao + 
+				"\t" + nomeTemp1 + " = " + $4.label + ";\n" +
+				"\t" + nomeTemp2 + " = " + $7.label + ";\n" +
+				"\t" + nomeTemp + " = (" + $1.tipo + ") malloc (" + nomeTemp1 + " * " + nomeTemp2 + " * sizeof(" + tipoBase + "));\n";
 				
 
 			}
@@ -1171,6 +1264,46 @@ E 			: E '/' E
 				$$.tipo = "REAL";
 				$$.label = $1.label;
 			}
+			| ID '[' E ']'
+			{
+
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				if (var.tipo.compare("int") && var.tipo.compare("REAL"))
+				{
+					cout << "\tNão é possível operações aritméticas com " + var.tipo + "!\n";
+					exit(1);
+				}
+
+				$$.traducao = $3.traducao;
+				$$.tipo = var.tipo;
+				$$.label = "*(" + var.identificacao + " + " + $3.label + ")";
+			}
+			| ID '[' E ']' '[' E ']'
+			{
+
+				//Variavel ID
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+
+				var.tipo = var.tipo.substr(0, var.tipo.size() - 1);
+
+				if (var.tipo.compare("int") && var.tipo.compare("REAL"))
+				{
+					cout << "\tNão é possível operações aritméticas com " + var.tipo + "!\n";
+					exit(1);
+				}
+
+				$$.traducao = $3.traducao + $6.traducao;
+				$$.tipo = var.tipo;
+				$$.label = "*(" + var.identificacao + " + " + $3.label + " * " + var.identificacao + "_d" + " + " + $6.label + ")";
+			}
 			
 			//Uso de IDs do lado direito da expressão
 			| TK_ID
@@ -1366,7 +1499,6 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 				$$.traducao = $8.tipo + " " + $2.label  + 
 				"(" + $4.traducao + $5.traducao + ")\n{\n" + $10.traducao + "\n}\n";
 			}
-			|
 			;
 PROCEDURE   : TK_PROCEDURE ID '(' PARGS ')' TK_IS BLOCO
 			{

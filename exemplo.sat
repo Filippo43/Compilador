@@ -1,9 +1,13 @@
 int main()
 {
-	real res[2];
+	int array [2];
 
-	res[1] = 3;
+	int a = array[1] + 2;
 
-	bool a;
+	array[1] = a;
+
+	string matriz [array[0]][array[1]];
+
+	matriz [0][0] = "Parece implementado";
 	
 }	
