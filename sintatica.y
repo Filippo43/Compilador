@@ -779,6 +779,9 @@ DECLARACAO	: TIPO ID OPATRIB ';'
 				//Tenta inserir variável
 				insereVariavel($2.label, $1.tipo , nomeTemp);
 
+				if (!$1.tipo.compare("char*"))
+					insereVariavel(genNomeGen(), "int" , nomeTemp + "_s");
+
 				//Verifica se a atribuição pode ocorrer de acordo com os tipos
 				verificaAtribuicao($1.tipo, $3.tipo);
 
@@ -1159,6 +1162,13 @@ OPLOGIC		: '=' '='
 
 E 			: E '/' E
 			{
+
+				if (!$1.tipo.compare("char*") && !$3.tipo.compare("char*"))
+				{
+					cout << "\tNão é possível operação de divisão com strings!\n";
+					exit(1);
+				}
+
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
 
@@ -1185,6 +1195,12 @@ E 			: E '/' E
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
 
+					if (!$1.tipo.compare("char*") && !$3.tipo.compare("char*"))
+				{
+					cout << "\tNão é possível operação de subtração com strings!\n";
+					exit(1);
+				}
+
 				//Criação de variável temporária
 				string nometemp = genTemp();
 
@@ -1207,6 +1223,7 @@ E 			: E '/' E
 			| E '+' E
 			{
 
+				
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
 
@@ -1220,16 +1237,61 @@ E 			: E '/' E
 				//Guarda o tipo da Expressão resultante em E
 				$$.tipo = $1.tipo;
 
-				//Passa para E a tradução
-				$$.traducao = $1.traducao + $3.traducao 
-				+ "\t" + nometemp + " = " + $1.label + " + " + $3.label + ";\n";
+				if (!$1.tipo.compare("char*") && !$3.tipo.compare("char*"))
+				{
 
+					//Insere nova variável de tamanho
+					insereVariavel(genNomeGen(), "int", nometemp + "_s");
+
+					//Passa para E a tradução
+					$$.traducao = $1.traducao + $3.traducao 
+					+ "\t" + nometemp + "_s = " + $1.label + "_s + " + $3.label + "_s;\n"
+					+ "\t" + nometemp + "_s = " + nometemp + "_s - 1;\n" 
+					+ "\t" + nometemp + " = (" + $1.tipo + ") malloc (" + nometemp + "_s * sizeof(" + $1.tipo.substr(0, $1.tipo.size() -1) + ");\n" 
+					+ "\tstrcpy(" + nometemp + ", " + $1.label + ");\n"
+					+ "\tstrcat(" + nometemp + ", " + $3.label + ");\n";
+
+				}
+				else
+				{
+					//Passa para E a tradução
+					$$.traducao = $1.traducao + $3.traducao 
+					+ "\t" + nometemp + " = " + $1.label + " + " + $3.label + ";\n";
+				}
+				
 				//Passa para E seu valor de temporária
 				$$.label = nometemp;
 
 			}
+			| TK_STRING
+			{
+
+				//Cria e insere variáveis
+				string nomeTemp1 = genTemp();
+				insereVariavel(genNomeGen(), "char*" , nomeTemp1);
+
+				string nomeTemp2 = nomeTemp1 + "_s";
+				insereVariavel(genNomeGen(), "int" , nomeTemp2);
+
+				int size = $1.label.length() - 1;
+
+				$$.traducao = "\t" + nomeTemp2 + " = " + to_string(size) + ";\n"
+				+ "\t" + nomeTemp1 + " = (char*) malloc (sizeof(char) * " + nomeTemp2 + ");\n"
+				+ "\t" + "strcpy(" + nomeTemp1 + ", " + $1.label + ");\n";
+
+				$$.tipo = "char*";
+
+				$$.label = nomeTemp1;
+			}
 			| E '-' E
 			{
+
+				if (!$1.tipo.compare("char*") && !$3.tipo.compare("char*"))
+				{
+					cout << "\tNão é possível operação de subtração com strings!\n";
+					exit(1);
+				}
+
 				//Verifica se a expressão é válida
 				atualizaRegraExprAritimetica($1, $3);
 
@@ -1304,7 +1366,6 @@ E 			: E '/' E
 				$$.tipo = var.tipo;
 				$$.label = "*(" + var.identificacao + " + " + $3.label + " * " + var.identificacao + "_d" + " + " + $6.label + ")";
 			}
-			
 			//Uso de IDs do lado direito da expressão
 			| TK_ID
 			{
@@ -1343,7 +1404,8 @@ E 			: E '/' E
 				$$.label = nometemp; 
 			}
 			;
-ID		: TK_ID
+
+ID			: TK_ID
 			{
 				//Passa seu nome literal para ID
 

@@ -10,4 +10,13 @@ int main()
 
 	matriz [0][0] = "Parece implementado";
 	
+	string x;
+
+	string y;
+
+	string c = x + y + "oi";
+
+	int w = 1;
+
+	real z = w - 3.0 * 5;
 }	
