@@ -1553,6 +1553,27 @@ FUNCTION    : TK_FUNCTION ID '(' PAR ARGS ')' TK_RETURN TIPO TK_IS BLOCO
 			{
 				_function func;
 				
+				for(std::vector< vector <variavel> >::reverse_iterator it = pilhaContextoVariavel.rbegin(); it != pilhaContextoVariavel.rend(); it++)    
+				{
+					vector <variavel> tabelaVariaveis = *it;
+
+					if(tabelaVariaveis.size() == 0)
+					{
+						continue;
+					}
+					for(std::vector<variavel>::iterator it = tabelaVariaveis.begin(); it != tabelaVariaveis.end(); it++)    
+					{
+						//Aponta pra uma variável
+						variavel temp = *it;
+						cout << temp.nome;
+						if(!temp.nome.compare($2.label))
+						{
+							cout << "variavel com este nome";
+							exit(0);
+						}
+					}
+				}
+
 				func.functionContext = funcContext;
 				func.label =  $2.label;
 				funcContext.erase(funcContext.begin(), funcContext.end());
@@ -1694,7 +1715,53 @@ ONE_PAR     : ID
 				$$.traducao = var.identificacao;
 				$$.label = $1.label;
 			}
+			| TK_NUM
+			{
+				variavel var;
+
+				var.identificacao = genTemp() ;
+				var.tipo = "const int";
+				var.nome = $1.label;
+				cout << $1.tipo;
+				insereVariavel($1.label, "const int", var.identificacao + " = " + $1.label);
+				$$.traducao = var.identificacao;
+			}
+			| TK_CHAR
+			{
+				variavel var;
+
+				var.identificacao = genTemp() ;
+				var.tipo = "const char";
+				var.nome = $1.label;
+				cout << $1.tipo;
+				insereVariavel($1.label, "const char", var.identificacao + " = " + $1.label);
+				$$.traducao = var.identificacao;
+			}
+			| TK_REAL
+			{
+				variavel var;
+
+				var.identificacao = genTemp() ;
+				var.tipo = "const float";
+				var.nome = $1.label;
+				cout << $1.tipo;
+				insereVariavel($1.label, "const float", var.identificacao + " = " + $1.label);
+				$$.traducao = var.identificacao;
+			}
+			| TK_BOOL
+			{
+				variavel var;
+
+				var.identificacao = genTemp() ;
+				var.tipo = "const BOOL";
+				var.nome = $1.label;
+				cout << $1.tipo;
+				insereVariavel($1.label, "const BOOL", var.identificacao + " = " + $1.label);
+				$$.traducao = var.identificacao;
+			}
+
 			;
+
 PARS        : ONE_PAR P_MORE_ARGS
 			{
 				$$.traducao = $1.traducao + $2.traducao;

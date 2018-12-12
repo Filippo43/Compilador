@@ -1,22 +1,17 @@
+int Soma;
+
+function Soma(int a, int b) return int is
+{
+	real vasco = a + b;
+	return vasco;
+}
+
+
+
 int main()
 {
-	int array [2];
+	int res;
 
-	int a = array[1] + 2;
 
-	array[1] = a;
-
-	string matriz [array[0]][array[1]];
-
-	matriz [0][0] = "Parece implementado";
-	
-	string x;
-
-	string y;
-
-	string c = x + y + "oi";
-
-	int w = 1;
-
-	real z = w - 3.0 * 5;
+	res = Soma(10, 20);
 }	
