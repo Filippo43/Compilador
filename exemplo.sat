@@ -1,17 +1,8 @@
-int Soma;
-
-function Soma(int a, int b) return int is
-{
-	real vasco = a + b;
-	return vasco;
-}
 
 
 
 int main()
 {
 	int res;
-
-
-	res = Soma(10, 20);
+	res += 10;	
 }	

@@ -60,6 +60,8 @@ CASE (case){NUM}
 
 "switch"	{return TK_SWITCH;}
 
+"breakall" {return TK_BREAKALL;}
+
 "string"	{return TK_TIPO_STRING;}
 
 "char"		{return TK_TIPO_CHAR;}

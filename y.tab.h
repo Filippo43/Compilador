@@ -1,392 +1,126 @@
-#ifndef YY_parse_h_included
-#define YY_parse_h_included
-/*#define YY_USE_CLASS 
-*/
-#line 1 "/usr/share/bison++/bison.h"
-/* before anything */
-#ifdef c_plusplus
- #ifndef __cplusplus
-  #define __cplusplus
- #endif
+/* A Bison parser, made by GNU Bison 3.0.4.  */
+
+/* Bison interface for Yacc-like parsers in C
+
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+
+/* Token type.  */
+#ifndef YYTOKENTYPE
+# define YYTOKENTYPE
+  enum yytokentype
+  {
+    TK_IS = 258,
+    TK_NUM = 259,
+    TK_REAL = 260,
+    TK_BOOL = 261,
+    TK_CHAR = 262,
+    TK_WHILE = 263,
+    TK_FOR = 264,
+    TK_DO = 265,
+    TK_BREAK = 266,
+    TK_CONTINUE = 267,
+    TK_BREAKALL = 268,
+    TK_MAIN = 269,
+    TK_ID = 270,
+    TK_TIPO_INT = 271,
+    TK_TIPO_REAL = 272,
+    TK_TIPO_BOOL = 273,
+    TK_TIPO_CHAR = 274,
+    TK_STRING = 275,
+    TK_TIPO_STRING = 276,
+    TK_FIM = 277,
+    TK_ERROR = 278,
+    TK_INPUT = 279,
+    TK_OUTPUT = 280,
+    TK_SWITCH = 281,
+    TK_CASE = 282,
+    TK_DEFAULT = 283,
+    TK_IF = 284,
+    TK_ELSE = 285,
+    TK_FUNCTION = 286,
+    TK_RETURN = 287,
+    TK_PROCEDURE = 288
+  };
+#endif
+/* Tokens.  */
+#define TK_IS 258
+#define TK_NUM 259
+#define TK_REAL 260
+#define TK_BOOL 261
+#define TK_CHAR 262
+#define TK_WHILE 263
+#define TK_FOR 264
+#define TK_DO 265
+#define TK_BREAK 266
+#define TK_CONTINUE 267
+#define TK_BREAKALL 268
+#define TK_MAIN 269
+#define TK_ID 270
+#define TK_TIPO_INT 271
+#define TK_TIPO_REAL 272
+#define TK_TIPO_BOOL 273
+#define TK_TIPO_CHAR 274
+#define TK_STRING 275
+#define TK_TIPO_STRING 276
+#define TK_FIM 277
+#define TK_ERROR 278
+#define TK_INPUT 279
+#define TK_OUTPUT 280
+#define TK_SWITCH 281
+#define TK_CASE 282
+#define TK_DEFAULT 283
+#define TK_IF 284
+#define TK_ELSE 285
+#define TK_FUNCTION 286
+#define TK_RETURN 287
+#define TK_PROCEDURE 288
+
+/* Value type.  */
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef int YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
 #endif
 
 
- #line 8 "/usr/share/bison++/bison.h"
+extern YYSTYPE yylval;
 
-#line 21 "/usr/share/bison++/bison.h"
- /* %{ and %header{ and %union, during decl */
-#ifndef YY_parse_COMPATIBILITY
- #ifndef YY_USE_CLASS
-  #define  YY_parse_COMPATIBILITY 1
- #else
-  #define  YY_parse_COMPATIBILITY 0
- #endif
-#endif
+int yyparse (void);
 
-#if YY_parse_COMPATIBILITY != 0
-/* backward compatibility */
- #ifdef YYLTYPE
-  #ifndef YY_parse_LTYPE
-   #define YY_parse_LTYPE YYLTYPE
-/* WARNING obsolete !!! user defined YYLTYPE not reported into generated header */
-/* use %define LTYPE */
-  #endif
- #endif
-/*#ifdef YYSTYPE*/
-  #ifndef YY_parse_STYPE
-   #define YY_parse_STYPE YYSTYPE
-  /* WARNING obsolete !!! user defined YYSTYPE not reported into generated header */
-   /* use %define STYPE */
-  #endif
-/*#endif*/
- #ifdef YYDEBUG
-  #ifndef YY_parse_DEBUG
-   #define  YY_parse_DEBUG YYDEBUG
-   /* WARNING obsolete !!! user defined YYDEBUG not reported into generated header */
-   /* use %define DEBUG */
-  #endif
- #endif 
- /* use goto to be compatible */
- #ifndef YY_parse_USE_GOTO
-  #define YY_parse_USE_GOTO 1
- #endif
-#endif
-
-/* use no goto to be clean in C++ */
-#ifndef YY_parse_USE_GOTO
- #define YY_parse_USE_GOTO 0
-#endif
-
-#ifndef YY_parse_PURE
-
- #line 65 "/usr/share/bison++/bison.h"
-
-#line 65 "/usr/share/bison++/bison.h"
-/* YY_parse_PURE */
-#endif
-
-
- #line 68 "/usr/share/bison++/bison.h"
-#ifndef YY_USE_CLASS
-# ifndef YYSTYPE
-#  define YYSTYPE int
-#  define YYSTYPE_IS_TRIVIAL 1
-# endif
-#endif
-
-#line 68 "/usr/share/bison++/bison.h"
-/* prefix */
-
-#ifndef YY_parse_DEBUG
-
- #line 71 "/usr/share/bison++/bison.h"
-
-#line 71 "/usr/share/bison++/bison.h"
-/* YY_parse_DEBUG */
-#endif
-
-#ifndef YY_parse_LSP_NEEDED
-
- #line 75 "/usr/share/bison++/bison.h"
-
-#line 75 "/usr/share/bison++/bison.h"
- /* YY_parse_LSP_NEEDED*/
-#endif
-
-/* DEFAULT LTYPE*/
-#ifdef YY_parse_LSP_NEEDED
- #ifndef YY_parse_LTYPE
-  #ifndef BISON_YYLTYPE_ISDECLARED
-   #define BISON_YYLTYPE_ISDECLARED
-typedef
-  struct yyltype
-    {
-      int timestamp;
-      int first_line;
-      int first_column;
-      int last_line;
-      int last_column;
-      char *text;
-   }
-  yyltype;
-  #endif
-
-  #define YY_parse_LTYPE yyltype
- #endif
-#endif
-
-/* DEFAULT STYPE*/
-#ifndef YY_parse_STYPE
- #define YY_parse_STYPE int
-#endif
-
-/* DEFAULT MISCELANEOUS */
-#ifndef YY_parse_PARSE
- #define YY_parse_PARSE yyparse
-#endif
-
-#ifndef YY_parse_LEX
- #define YY_parse_LEX yylex
-#endif
-
-#ifndef YY_parse_LVAL
- #define YY_parse_LVAL yylval
-#endif
-
-#ifndef YY_parse_LLOC
- #define YY_parse_LLOC yylloc
-#endif
-
-#ifndef YY_parse_CHAR
- #define YY_parse_CHAR yychar
-#endif
-
-#ifndef YY_parse_NERRS
- #define YY_parse_NERRS yynerrs
-#endif
-
-#ifndef YY_parse_DEBUG_FLAG
- #define YY_parse_DEBUG_FLAG yydebug
-#endif
-
-#ifndef YY_parse_ERROR
- #define YY_parse_ERROR yyerror
-#endif
-
-#ifndef YY_parse_PARSE_PARAM
- #ifndef __STDC__
-  #ifndef __cplusplus
-   #ifndef YY_USE_CLASS
-    #define YY_parse_PARSE_PARAM
-    #ifndef YY_parse_PARSE_PARAM_DEF
-     #define YY_parse_PARSE_PARAM_DEF
-    #endif
-   #endif
-  #endif
- #endif
- #ifndef YY_parse_PARSE_PARAM
-  #define YY_parse_PARSE_PARAM void
- #endif
-#endif
-
-/* TOKEN C */
-#ifndef YY_USE_CLASS
-
- #ifndef YY_parse_PURE
-  #ifndef yylval
-   extern YY_parse_STYPE YY_parse_LVAL;
-  #else
-   #if yylval != YY_parse_LVAL
-    extern YY_parse_STYPE YY_parse_LVAL;
-   #else
-    #warning "Namespace conflict, disabling some functionality (bison++ only)"
-   #endif
-  #endif
- #endif
-
-
- #line 169 "/usr/share/bison++/bison.h"
-#define	TK_IS	258
-#define	TK_NUM	259
-#define	TK_REAL	260
-#define	TK_BOOL	261
-#define	TK_CHAR	262
-#define	TK_WHILE	263
-#define	TK_FOR	264
-#define	TK_DO	265
-#define	TK_BREAK	266
-#define	TK_CONTINUE	267
-#define	TK_MAIN	268
-#define	TK_ID	269
-#define	TK_TIPO_INT	270
-#define	TK_TIPO_REAL	271
-#define	TK_TIPO_BOOL	272
-#define	TK_TIPO_CHAR	273
-#define	TK_STRING	274
-#define	TK_TIPO_STRING	275
-#define	TK_FIM	276
-#define	TK_ERROR	277
-#define	TK_INPUT	278
-#define	TK_OUTPUT	279
-#define	TK_SWITCH	280
-#define	TK_CASE	281
-#define	TK_DEFAULT	282
-#define	TK_IF	283
-#define	TK_ELSE	284
-#define	TK_FUNCTION	285
-#define	TK_RETURN	286
-#define	TK_PROCEDURE	287
-
-
-#line 169 "/usr/share/bison++/bison.h"
- /* #defines token */
-/* after #define tokens, before const tokens S5*/
-#else
- #ifndef YY_parse_CLASS
-  #define YY_parse_CLASS parse
- #endif
-
- #ifndef YY_parse_INHERIT
-  #define YY_parse_INHERIT
- #endif
-
- #ifndef YY_parse_MEMBERS
-  #define YY_parse_MEMBERS 
- #endif
-
- #ifndef YY_parse_LEX_BODY
-  #define YY_parse_LEX_BODY  
- #endif
-
- #ifndef YY_parse_ERROR_BODY
-  #define YY_parse_ERROR_BODY  
- #endif
-
- #ifndef YY_parse_CONSTRUCTOR_PARAM
-  #define YY_parse_CONSTRUCTOR_PARAM
- #endif
- /* choose between enum and const */
- #ifndef YY_parse_USE_CONST_TOKEN
-  #define YY_parse_USE_CONST_TOKEN 0
-  /* yes enum is more compatible with flex,  */
-  /* so by default we use it */ 
- #endif
- #if YY_parse_USE_CONST_TOKEN != 0
-  #ifndef YY_parse_ENUM_TOKEN
-   #define YY_parse_ENUM_TOKEN yy_parse_enum_token
-  #endif
- #endif
-
-class YY_parse_CLASS YY_parse_INHERIT
-{
-public: 
- #if YY_parse_USE_CONST_TOKEN != 0
-  /* static const int token ... */
-  
- #line 212 "/usr/share/bison++/bison.h"
-static const int TK_IS;
-static const int TK_NUM;
-static const int TK_REAL;
-static const int TK_BOOL;
-static const int TK_CHAR;
-static const int TK_WHILE;
-static const int TK_FOR;
-static const int TK_DO;
-static const int TK_BREAK;
-static const int TK_CONTINUE;
-static const int TK_MAIN;
-static const int TK_ID;
-static const int TK_TIPO_INT;
-static const int TK_TIPO_REAL;
-static const int TK_TIPO_BOOL;
-static const int TK_TIPO_CHAR;
-static const int TK_STRING;
-static const int TK_TIPO_STRING;
-static const int TK_FIM;
-static const int TK_ERROR;
-static const int TK_INPUT;
-static const int TK_OUTPUT;
-static const int TK_SWITCH;
-static const int TK_CASE;
-static const int TK_DEFAULT;
-static const int TK_IF;
-static const int TK_ELSE;
-static const int TK_FUNCTION;
-static const int TK_RETURN;
-static const int TK_PROCEDURE;
-
-
-#line 212 "/usr/share/bison++/bison.h"
- /* decl const */
- #else
-  enum YY_parse_ENUM_TOKEN { YY_parse_NULL_TOKEN=0
-  
- #line 215 "/usr/share/bison++/bison.h"
-	,TK_IS=258
-	,TK_NUM=259
-	,TK_REAL=260
-	,TK_BOOL=261
-	,TK_CHAR=262
-	,TK_WHILE=263
-	,TK_FOR=264
-	,TK_DO=265
-	,TK_BREAK=266
-	,TK_CONTINUE=267
-	,TK_MAIN=268
-	,TK_ID=269
-	,TK_TIPO_INT=270
-	,TK_TIPO_REAL=271
-	,TK_TIPO_BOOL=272
-	,TK_TIPO_CHAR=273
-	,TK_STRING=274
-	,TK_TIPO_STRING=275
-	,TK_FIM=276
-	,TK_ERROR=277
-	,TK_INPUT=278
-	,TK_OUTPUT=279
-	,TK_SWITCH=280
-	,TK_CASE=281
-	,TK_DEFAULT=282
-	,TK_IF=283
-	,TK_ELSE=284
-	,TK_FUNCTION=285
-	,TK_RETURN=286
-	,TK_PROCEDURE=287
-
-
-#line 215 "/usr/share/bison++/bison.h"
- /* enum token */
-     }; /* end of enum declaration */
- #endif
-public:
- int YY_parse_PARSE(YY_parse_PARSE_PARAM);
- virtual void YY_parse_ERROR(char *msg) YY_parse_ERROR_BODY;
- #ifdef YY_parse_PURE
-  #ifdef YY_parse_LSP_NEEDED
-   virtual int  YY_parse_LEX(YY_parse_STYPE *YY_parse_LVAL,YY_parse_LTYPE *YY_parse_LLOC) YY_parse_LEX_BODY;
-  #else
-   virtual int  YY_parse_LEX(YY_parse_STYPE *YY_parse_LVAL) YY_parse_LEX_BODY;
-  #endif
- #else
-  virtual int YY_parse_LEX() YY_parse_LEX_BODY;
-  YY_parse_STYPE YY_parse_LVAL;
-  #ifdef YY_parse_LSP_NEEDED
-   YY_parse_LTYPE YY_parse_LLOC;
-  #endif
-  int YY_parse_NERRS;
-  int YY_parse_CHAR;
- #endif
- #if YY_parse_DEBUG != 0
-  public:
-   int YY_parse_DEBUG_FLAG;	/*  nonzero means print parse trace	*/
- #endif
-public:
- YY_parse_CLASS(YY_parse_CONSTRUCTOR_PARAM);
-public:
- YY_parse_MEMBERS 
-};
-/* other declare folow */
-#endif
-
-
-#if YY_parse_COMPATIBILITY != 0
- /* backward compatibility */
- /* Removed due to bison problems
- /#ifndef YYSTYPE
- / #define YYSTYPE YY_parse_STYPE
- /#endif*/
-
- #ifndef YYLTYPE
-  #define YYLTYPE YY_parse_LTYPE
- #endif
- #ifndef YYDEBUG
-  #ifdef YY_parse_DEBUG 
-   #define YYDEBUG YY_parse_DEBUG
-  #endif
- #endif
-
-#endif
-/* END */
-
- #line 267 "/usr/share/bison++/bison.h"
-#endif
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */

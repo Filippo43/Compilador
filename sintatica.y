@@ -337,7 +337,7 @@ string genNomeGen();
 %}
 
 %token TK_IS
-%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE
+%token TK_NUM TK_REAL TK_BOOL TK_CHAR TK_WHILE TK_FOR TK_DO TK_BREAK TK_CONTINUE TK_BREAKALL
 %token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_REAL TK_TIPO_BOOL TK_TIPO_CHAR TK_STRING TK_TIPO_STRING
 %token TK_FIM TK_ERROR TK_INPUT TK_OUTPUT TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_IF TK_ELSE
@@ -491,6 +491,19 @@ INTLACO 	: TK_BREAK ';'
 				laco lacoAtual = pilhaLaco.back();
 
 				//Realiza o desvio do laço em questão
+				$$.traducao = "\tgoto " + lacoAtual.labelfim + ";\n";
+
+			}
+			| TK_BREAKALL ';'
+			{
+				//Verifica se há um contexto de laço em questão
+				if (pilhaLaco.size() == 0)
+				{
+					cout << "\tbreak fora de um laço!\n";
+					exit(3);
+				}
+
+				laco lacoAtual = pilhaLaco.front();
 				$$.traducao = "\tgoto " + lacoAtual.labelfim + ";\n";
 
 			}
@@ -766,7 +779,56 @@ ATRIBUICAO 	: ID OPATRIB ';'
 						"\t" + "(" + var.identificacao + " + " + $3.label + " * " + var.identificacao + "_d + " + $6.label + ")* = " + $8.label + ";\n";
 				}
 			}
+			| ID OPUNARIO
+			{
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+
+				if((!var.tipo.compare("int") || !var.tipo.compare("real"))){
+					$$.traducao = "\t" + var.identificacao + " = " + var.identificacao + " " + $2.traducao + " " +"1;\n";
+				}
+				else{
+					cout << "Esse tipo de variavel não pode ter um operador unário.\n";	
+					exit(1);
+				}
+
+			}
+			| ID OPCOMPOSTO E ';'
+			{
+				variavel var;
+				
+				buscaVariavel($1.label, var);
+
+				
+					$$.traducao =   $3.traducao + "\t" + var.identificacao + " = " + var.identificacao + " " + $2.traducao  + $3.label + ";\n";
+				
+			}
 			;
+OPUNARIO : '+''+'';'
+			{
+				$$.traducao = '+';
+			}
+			| '-''-'';'
+			{
+				$$.traducao = '-';
+			}
+OPCOMPOSTO 		: '+''='
+			{
+				$$.traducao = '+';
+			}
+			| '-''='
+			{
+				$$.traducao = '-';
+			}
+			| '*''='
+			{
+				$$.traducao = '*';
+			}
+			| '/''='
+			{
+				$$.traducao = '/';
+			};
 			
 //Declarações
 DECLARACAO	: TIPO ID OPATRIB ';'
